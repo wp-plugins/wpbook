@@ -2,7 +2,7 @@
 Contributors: davelester
 Donate link: http://www.davelester.org
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 0.5
+Stable tag: 0.5.1
 
 Plugin to embed Wordpress Blog into Facebook Canvas using the Facebook Platform.
 
@@ -31,6 +31,9 @@ If you have properly installed WPBook, you can access it at http://www.yourblog.
 The /wpbook/ directory is an automatically generated page the plugin generates (this is if you have name-based permalinks turned on, otherwise the URL will be different)
 
 == Version History ==
+
+= Version 0.5.1 =
+* Changes function and class names to avoid conflicts with other WP plugins
 
 = Version 0.5 =
 * Added support for PHP4 Facebook Client Library
