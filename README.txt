@@ -1,12 +1,31 @@
 === WPBook ===
-Contributors: davelester, johneckman
+Contributors: davelester, johneckman, bandonrandon
 Donate link: http://www.davelester.org
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 0.8.2
+Stable tag: 0.9.1
 Tested up to: 2.7
 Requires at least: 2.5
 
 Plugin to embed Wordpress Blog into Facebook Platform.
+
+== Overview ==
+
+WPBook enables users to add your (self-hosted, not wordpress.com) wordpress blog 
+as a Facebook application. Facebook users will see your posts in a Facebook
+looks and feel, and can leave comments with their Facebook identity. 
+
+Comments are shared - meaning comments made by users on your blog at its 
+regular domain and comments made by users inside Facebook are all shown to 
+users of either "view" of your content. 
+
+Facebook users can also - at their option - add a profile box to their profile,
+using the "add to profile" button at the top of the default canvas page. 
+
+That profile box shows the 5 most recent posts from your blog, as links. 
+
+NOTE: If you update using the "automatic update" feature, you will
+      need to copy the theme files (in the wp-facebook subdirectory) 
+      over to wp-content/themes/ for the plugin updates to work. 
 
 == Installation ==
 1. Copy wpbook.php into your wordpress plugins folder, normally located
@@ -45,9 +64,6 @@ Plugin to embed Wordpress Blog into Facebook Platform.
    Facebook when viewing your application which allows users to send
    invites to their friends. 
 
-NOTE: If you update using the "automatic update" feature, you will
-      need to copy the theme files (in the wp-facebook subdirectory) 
-      over to wp-content/themes/ for the plugin updates to work. 
 
 == Frequently Asked Questions ==
 
@@ -60,6 +76,15 @@ There's also a style.css which basically mimics Facebook's styles, as well
 as some other files for processing comments and the like.  
 
 == Version History ==
+
+= Version 0.9.1 =
+* Fixed xd_reciever.html versus xd_receiver.html issue
+* (You'd think a guy with a PhD in English would know how to spell.) 
+
+= Version 0.9  = 
+* Added profile boxes
+* Shows 5 most recent posts in profile box
+* Also sets FBML for "pages" profile boxes
 
 = Version 0.8.2 =
 * Added option to require email address of comment author
