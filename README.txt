@@ -1,18 +1,37 @@
 === WPBook ===
-Contributors: davelester, johneckman
+Contributors: davelester, johneckman, bandonrandon
 Donate link: http://www.davelester.org
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 0.8.2
+Stable tag: 0.9.3
 Tested up to: 2.7
 Requires at least: 2.5
 
 Plugin to embed Wordpress Blog into Facebook Platform.
 
-== Installation ==
-1. Copy wpbook.php into your wordpress plugins folder, normally located
-   in /wp-content/plugins/
+== Overview ==
 
-2. Copy the wp-facebook directory into your themes folder, normally
+WPBook enables users to add your (self-hosted, not wordpress.com) wordpress 
+blog as a Facebook application. Facebook users will see your posts in a 
+Facebook look and feel, and can leave comments with their Facebook identity. 
+
+Comments are shared - meaning comments made by users on your blog at its 
+regular domain and comments made by users inside Facebook are all shown to 
+users of either "view" of your content. 
+
+Facebook users can also - at their option - add a profile box to their profile,
+using the "add to profile" button at the top of the default canvas page. 
+
+That profile box shows the 5 most recent posts from your blog, as links. 
+
+NOTE: If you update using the "automatic update" feature, you will
+      need to copy the theme files (in the wp-facebook subdirectory) 
+      over to wp-content/themes/ for the plugin updates to work. 
+
+== Installation ==
+1. Copy the entire WPBook directory into your wordpress plugins folder,
+   /wp-content/plugins/
+
+2. Copy the wp-facebook subdirectory into your themes folder, normally
    located in /wp-content/themes/
 
    Note that if you use the "automated update" of plugins feature, you will 
@@ -28,9 +47,7 @@ Plugin to embed Wordpress Blog into Facebook Platform.
    no trailing slash. Remember it. 
    
    Set the application type to "website"
-   
-   Set the sidenav url to your canvas url
-   
+      
    Set the application to use an iFrame, not fbml, and to "resizable"
    (Using iFrames lets you use javascript, objects, and other tags 
     not allowed in FBML inside blog posts)
@@ -45,9 +62,11 @@ Plugin to embed Wordpress Blog into Facebook Platform.
    Facebook when viewing your application which allows users to send
    invites to their friends. 
 
-NOTE: If you update using the "automatic update" feature, you will
-      need to copy the theme files (in the wp-facebook subdirectory) 
-      over to wp-content/themes/ for the plugin updates to work. 
+6. If you wish to enable users to add your blog application to Facebook
+   Pages, not just individual user profiles, get the default FBML by 
+   visiting the settings page inside Wordpress, and enter that in the 
+   appropriate place (default FBML) within the Facebook Application Settings
+   page, using the Facebook Developer Application. 
 
 == Frequently Asked Questions ==
 
@@ -60,6 +79,24 @@ There's also a style.css which basically mimics Facebook's styles, as well
 as some other files for processing comments and the like.  
 
 == Version History ==
+
+= Version 0.9.3 =
+* Bug in commenting inside Facebook due to $facebook->redirect
+* Now redirects to the post on which the user commented
+* Added instruction for adding to FB Pages to settings page in WordPress
+
+= Version 0.9.2 =
+* Didn't realize I had set default FBML inside Facebook, masked a bug
+* Should now set profile FBML before calling add profile box
+
+= Version 0.9.1 =
+* Fixed xd_reciever.html versus xd_receiver.html issue
+* (You'd think a guy with a PhD in English would know how to spell.) 
+
+= Version 0.9  = 
+* Added profile boxes
+* Shows 5 most recent posts in profile box
+* Also sets FBML for "pages" profile boxes
 
 = Version 0.8.2 =
 * Added option to require email address of comment author
@@ -136,3 +173,6 @@ as some other files for processing comments and the like.
 = Ongoing =
 * Option for comments or no comments in admin section
 * Better accompanying documentation
+* Share button on individual posts
+* Move wp-facebook theme to a subdirectory of plugin directory
+  to enable auto-update
