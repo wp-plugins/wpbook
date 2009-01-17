@@ -43,7 +43,7 @@ include_once 'config.php';
 		}
 	} 
 	else {  // this is the regular blog page
-    $receiver_url = get_bloginfo('template_directory') . '/xd_receiver.html';
+    $receiver_url = get_bloginfo('wpurl') . '/wp-content/plugins/wpbook/theme/xd_receiver.html';
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
@@ -53,7 +53,7 @@ include_once 'config.php';
 <head>
 <title>Facebook Blog Application</title>
 <?php wp_head(); ?>
-<link rel="stylesheet" href="<?php bloginfo('stylesheet_url'); ?>" 
+<link rel="stylesheet" href="<?php bloginfo('wpurl'); ?>/wp-content/plugins/wpbook/theme/default/style.css" 
   type="text/css" media="screen" />
 <BASE TARGET="_top">	
 </head>
@@ -69,6 +69,9 @@ FB_RequireFeatures(["CanvasUtil"], function() {
 });
 </script>		
 <div><div id="addProfileButton" style="float:right"></div></div>
+
+<!-- Debug: Template Directory is: <?php bloginfo('template_directory'); ?> -->
+
 <div>
 	<h3><a href="http://apps.facebook.com/<?php echo $app_url; ?>/" 
     target="_top"><?php bloginfo('name'); ?></a></h3>
