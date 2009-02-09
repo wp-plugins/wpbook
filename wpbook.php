@@ -1,17 +1,19 @@
 <?php
 /*
 Plugin Name: WPBook
-Plugin URI: http://www.scholarpress.net
-Date: 2009, January 2
-Description: Plugin to embed Wordpress Blog into Facebook Canvas using the Facebook Platform. <b>If you update via automatic update, be sure to copy theme to appropriate directory!</b> <em>By <a href="http://johneckman.com/">John Eckman</a>.</em> 
-Author: Dave Lester
-Author URI: http://www.davelester.org
-Version: 0.8.2
+Plugin URI: http://www.openparenthesis.org/code/wp
+Date: 2009, February 9
+Description: Plugin to embed Wordpress Blog into Facebook Canvas using 
+the Facebook Platform. 
+Author: John Eckman
+Author URI: http://johneckman.com
+Version: 1.1
 */
 
 /*
-	Note: As od version 0.7, this plugin draws inspiration (and code) from Alex King's
-	WP-Mobile plugin (http://alexking.org/projects/wordpress) adapted by John Eckman for Facebook context.
+Note: This plugin draws from: 
+   Alex King's WP-Mobile plugin (http://alexking.org/projects/wordpress ) 
+   and BraveNewCode's WPTouch (http://www.bravenewcode.com/wptouch/ )
 */
 
 /*  
@@ -32,23 +34,26 @@ Version: 0.8.2
 
 // this function checks for admin pages
 if (!function_exists('is_admin_page')) {
-	function is_admin_page() {
-		if (function_exists('is_admin')) {
-			return is_admin();
-		}
+  function is_admin_page() {
+    if (function_exists('is_admin')) {
+      return is_admin();
+    }
 		if (function_exists('check_admin_referer')) {
 			return true;
 		}
 		else {
 			return false;
 		}
-	}
+  }
 }
 
-$_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] . (( isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '')));
+$_SERVER['REQUEST_URI'] = ( isset($_SERVER['REQUEST_URI']) ? 
+  $_SERVER['REQUEST_URI'] : $_SERVER['SCRIPT_NAME'] 
+  . (( isset($_SERVER['QUERY_STRING']) ? '?' 
+  . $_SERVER['QUERY_STRING'] : '')));
 
 function is_authorized() {
-	global $user_level;
+  global $user_level;
 	if (function_exists("current_user_can")) {
 		return current_user_can('activate_plugins');
 	} else {
@@ -64,87 +69,189 @@ function wpbook_getAdminOptions() {
 		}
 	return $wpbookAdminOptions;
 }
-
-function setAdminOptions($wpbook_installation, $fb_api_key, $fb_secret, $fb_app_url, $fb_app_name,$invite_friends,$require_email,$infinite_session) {
-	$wpbookAdminOptions = array('wpbook_installation' => $wpbook_installation,
-		'fb_api_key' => $fb_api_key,
-		'fb_secret'  => $fb_secret,
-		'fb_app_url' => $fb_app_url,
-		'fb_app_name'=> $fb_app_name,
-		'invite_friends' => $invite_friends,
-		'require_email' => $require_email,
-		'infinite_session' => $infinite_session);
-	update_option('wpbookAdminOptions', $wpbookAdminOptions);
-	
+  
+function setAdminOptions($wpbook_installation, $fb_api_key, $fb_secret, 
+                           $fb_app_url,$invite_friends,$require_email,$give_credit,
+                           $enable_share, $allow_comments,$links_position,$enable_external_link,$enable_profile_link) {
+  $wpbookAdminOptions = array('wpbook_installation' => $wpbook_installation,
+                              'fb_api_key' => $fb_api_key,
+                              'fb_secret'  => $fb_secret,
+                              'fb_app_url' => $fb_app_url,
+                              'invite_friends' => $invite_friends,
+                              'require_email' => $require_email,
+                              'give_credit' => $give_credit,
+                              'enable_share' => $enable_share,
+                              'allow_comments' => $allow_comments,
+                              'links_position' => $links_position,
+                              'enable_external_link' => $enable_external_link,
+                              'enable_profile_link' => $enable_profile_link);
+  update_option('wpbookAdminOptions', $wpbookAdminOptions);
 }
-
-
+  
 function wpbook_options_page() {
 	if (function_exists('add_options_page')) {
-		add_options_page('WPBook', 'WPBook', 8, basename(__FILE__), 'wpbook_subpanel');
+		add_options_page('WPBook', 'WPBook', 8, 
+		  basename(__FILE__), 'wpbook_subpanel');
 	}
 }
 
 function wpbook_subpanel() {
-	if (is_authorized()) {
-		if (isset($_POST['fb_api_key']) && isset($_POST['fb_secret'])) { 
-			$fb_api_key = $_POST['fb_api_key'];
-			$fb_secret = $_POST['fb_secret'];
-			$fb_app_url = $_POST['fb_app_url'];
-			$fb_app_name = $_POST['fb_app_name'];
-			$invite_friends = $_POST['invite_friends'];
-			$require_email = $_POST['require_email'];
-			$infinite_session = $_POST['infinite_session'];
-			setAdminOptions(1, $fb_api_key, $fb_secret, $fb_app_url, $fb_app_name,$invite_friends,$require_email,$infinite_session);
-			$flash = "Your settings have been saved. ";
-		} else {
-			$flash = "Please complete all necessary fields";
-		}
-	} else {
-		$flash = "You don't have enough access rights.";
-	}
-	
-	if (is_authorized()) {
-		$wpbookAdminOptions = wpbook_getAdminOptions();
-		if ($wpbookAdminOptions['wpbook_installation'] != 1) {  
-			setAdminOptions(1, null,null,null);
-		}
-		
-		if ($flash != '') echo '<div id="message"class="updated fade"><p>' . $flash . '</p></div>';
-		echo '<div class="wrap">';
-		echo '<h2>Set Up Your Facebook Application</h2>';
-		echo '<p>This plugin allows you to embed your blog into the Facebook canvas, and in future versions - users who have installed the app will be able to receive notifications upon new blog posts.  Note that this is the pre-1.0 version, so there are bound to be some quirks.</p>';
-		echo '<form action="';
-		echo $_SERVER["REQUEST_URI"];
-		echo '" method="post">';
-		echo '<ol>';
-		echo '<li>To use this app, you must register for an API key at <a href="http://www.facebook.com/developers/">http://www.facebook.com/developers/</a>.  Follow the link and click "set up a new application."  After you\'ve obtained the necessary info, fill in both your application\'s API and Secret keys.</li>';
-		echo '<li>Enter Your Facebook Application\'s API Key:<br /><input type="text" name="fb_api_key" value="' . htmlentities($wpbookAdminOptions['fb_api_key']) . '" size="45" /></li>';
-		echo '<li>Enter Your Facebook Application\'s Secret:<br /><input type="text" name="fb_secret" value="' . htmlentities($wpbookAdminOptions['fb_secret']) . '" size="45" /></li>';
-		echo '<li>Enter Your Facebook Application\'s Canvas Page URL: ( http://apps.facebook.com/[enter just this bit] )<br /><input type="text" name="fb_app_url" value="' . htmlentities($wpbookAdminOptions['fb_app_url']) . '" size="45" /></li>';
-		echo'<li><input type="checkbox" name="invite_friends" onclick="document.getElementById(\'invite_options\').style.display=(document.getElementById(\'invite_options\').style.display== \'none\')?\'block\':\'none\';" value = "true"';
-		 if( htmlentities($wpbookAdminOptions['invite_friends']) == "true"){ echo("checked");}
-		 echo '> Show Invite Friends Link
-		<div id="invite_options" style="display:';
-		if( htmlentities($wpbookAdminOptions['invite_friends']) == "true"){ echo("block");}else{ echo("none");}
-		echo';margin-top:15px;">Enter Your Application\'s Name:<br /><input type="text" name="fb_app_name" value="' . htmlentities($wpbookAdminOptions['fb_app_name']) . '" size="45" /> (no trailing spaces) </div> </li>';
-		echo'<li><input type="checkbox" name="require_email" value = "true"';
-		 if( htmlentities($wpbookAdminOptions['require_email']) == "true"){ echo("checked");}
-		 echo '> Require Comment Authors E-mail Address</li>';
-		echo '<li>Enter Your Facebook Application Infinite Session Key: (to get one, follow <a href="/wp-content/plugins/wpbook/infinite-session-directions.html">these directions</a>)<br /><input type="text" name="infinite_session" value="' . htmlentities($wpbookAdminOptions['infinite_session']) . '" size="45" /></li>';
-		echo '</ol>';
-		echo '<p><input type="submit" value="Save" /></p></form>';
-		echo '</div>';
-	} else {
-		echo '<div class="wrap"><p>Sorry, you are not allowed to access this page.</p></div>';
-	}
+  if (is_authorized()) {
+    if (isset($_POST['fb_api_key']) 
+        && isset($_POST['fb_secret'])) { 
+      $fb_api_key = $_POST['fb_api_key'];
+      $fb_secret = $_POST['fb_secret'];
+      $fb_app_url = $_POST['fb_app_url'];
+      $invite_friends = $_POST['invite_friends'];
+      $require_email = $_POST['require_email'];
+      $give_credit = $_POST['give_credit'];
+      $enable_share = $_POST['enable_share'];
+      $allow_comments = $_POST['allow_comments'];
+      $links_position = $_POST['links_position'];
+      $enable_external_link = $_POST['enable_external_link'];
+      $enable_profile_link = $_POST['enable_profile_link'];
+      setAdminOptions(1, $fb_api_key, $fb_secret, $fb_app_url,
+                      $invite_friends,$require_email,$give_credit,$enable_share,$allow_comments,$links_position,$enable_external_link,$enable_profile_link);
+      $flash = "Your settings have been saved. ";
+    } else {
+      $flash = "Please complete all necessary fields";
+    }
+  } else {
+    $flash = "You don't have enough access rights.";
+}
+    
+  if (is_authorized()) {
+    $wpbookAdminOptions = wpbook_getAdminOptions();
+    if ($wpbookAdminOptions['wpbook_installation'] != 1) {  
+      setAdminOptions(1, null,null,null);
+    }
+      
+    if ($flash != '') echo '<div id="message"class="updated fade">'
+      . '<p>' . $flash . '</p></div>';
+    echo '<div class="wrap">';
+    echo '<h2>Set Up Your Facebook Application</h2><p>';
+    echo 'This plugin allows you to embed your blog into the Facebook canvas';
+    echo ', allows Facebook users to comment on or share your blog posts, and ';
+    echo 'puts your 5 most recent posts in users profiles (with their permission).</p>';
+    echo '<p><a href="../wp-content/plugins/wpbook/instructions/index.html" target="_blank">Detailed instructions</a>, with screenshots</p>';
+    echo '<form action="'. $_SERVER["REQUEST_URI"] .'" method="post">';
+    echo '<ol>';
+    echo '<li>To use this app, you must register for an API key at ';
+    echo '<a href="http://www.facebook.com/developers/">';
+    echo 'http://www.facebook.com/developers/</a>.  Follow the link and click ';
+    echo '"set up a new application."  After you\'ve obtained the necessary ';
+    echo 'info, fill in both your application\'s API and Secret keys.</li>';
+    echo '<li>Enter Your Facebook Application\'s API Key:';
+    echo '<br /><input type="text" name="fb_api_key" value="';
+    echo htmlentities($wpbookAdminOptions['fb_api_key']) .'" size="45" /></li>';
+    echo '<li>Enter Your Facebook Application\'s Secret:<br />';
+    echo '<input type="text" name="fb_secret" value="';
+    echo htmlentities($wpbookAdminOptions['fb_secret']) .'" size="45" /></li>';
+    echo '<li>Enter Your Facebook Application\'s Canvas Page URL, ';
+    echo '<strong>NOT</strong> INCLUDING "http://apps.facebook.com/"<br />';
+    echo '<input type="text" name="fb_app_url" value="';
+    echo htmlentities($wpbookAdminOptions['fb_app_url']) .'" size="45" /></li>';
+      
+    // Here starts the "invite friends" section
+    echo '<li><input type="checkbox" name="invite_friends" value = "true"';
+    if( htmlentities($wpbookAdminOptions['invite_friends']) == "true"){ 
+      echo("checked");
+    }
+    echo '> Show Invite Friends Link </li>';
+    // thus the <li> for App name doesn't happen until here
+    
+    // Now let's handle commenting - only show require_email if comments on
+    echo '<li><input type="checkbox" name="allow_comments" value="true" ';
+    echo 'onclick="document.getElementById(\'comments_options\').style.';
+    echo 'display=(document.getElementById(\'comments_options\').style.';
+    echo 'display==\'none\')?\'block\':\'none\';" ';
+    if( htmlentities($wpbookAdminOptions['allow_comments']) == "true") {
+      echo("checked");
+    }
+    echo ' > Allow comments inside Facebook';
+    echo '<div id="comments_options" style="display:';
+    if ( htmlentities($wpbookAdminOptions['allow_comments']) == "true"){
+      echo("block");
+    } else {
+      echo("none");
+    }
+    echo ';">';
+    echo '<input type="checkbox" name="require_email" value = "true"';
+    if( htmlentities($wpbookAdminOptions['require_email']) == "true"){ 
+      echo("checked");
+    }
+    echo '> Require Comment Authors E-mail Address</div> </li>';
+    //start give credit option 
+    echo '<li><input type="checkbox" name="give_credit" value="true"';
+    if( htmlentities($wpbookAdminOptions['give_credit']) == "true"){
+      echo("checked");
+    }
+    echo '> Give WPBook Credit (in Facebook)</li>';
+    // show share option 
+    echo '<li><input type="checkbox" name="enable_share" value="true"';
+    if($enable_external_link != "true"){
+      echo 'onclick="document.getElementById(\'position_option\').style.';
+      echo 'display=(document.getElementById(\'position_option\').style.';
+      echo 'display==\'none\')?\'block\':\'none\';" ';
+    }
+    if( htmlentities($wpbookAdminOptions['enable_share']) == "true"){
+      echo("checked");
+    }
+    echo '> Enable "Share This Post" (in Facebook)</li>';
+    // show external link option 
+    
+    echo '<li><input type="checkbox" name="enable_external_link" value="true"';
+    if($enable_share != "true"){
+      echo 'onclick="document.getElementById(\'position_option\').style.';
+      echo 'display=(document.getElementById(\'position_option\').style.';
+      echo 'display==\'none\')?\'block\':\'none\';" ';
+    }
+    if( htmlentities($wpbookAdminOptions['enable_external_link']) == "true"){
+      echo("checked");
+    }
+    echo '> Enable "view post at external site" link</li>';
+    
+    //links button position for external and share button 
+    //see if share button or external link is enabled first
+    echo '<div id="position_option">';
+    echo '<li>Link Position for share button and external link button (on both single and list views):<br/>
+    <input type="radio" name="links_position" value = "top"';
+    if( htmlentities($wpbookAdminOptions['links_position']) == "top"){ 
+      echo("checked");
+    }
+    echo '>Top ';
+    echo '<input type="radio" name="links_position" value = "bottom"';
+    if( htmlentities($wpbookAdminOptions['links_position']) == "bottom"){ 
+      echo("checked");
+    }
+    echo '> Bottom <br/></li>';
+    echo'</div>';
+    echo '<li><input type="checkbox" name="enable_profile_link" value="true" ';
+    echo 'onclick="document.getElementById(\'enable_profile_link\').style.';
+    echo 'display=(document.getElementById(\'enable_profile_link\').style.';
+    echo 'display==\'none\')?\'block\':\'none\';" ';
+    if( htmlentities($wpbookAdminOptions['enable_profile_link']) == "true") {
+      echo("checked");
+    }
+    echo ' > Enable Facebook users to add your app to their profile';
+    echo '</li></ol>';
+    echo '<p><input type="submit" value="Save" class="button"';
+    echo 'name="wpbook_save_button" /></p></form>';
+    echo '</div>';
+  } else {
+    echo '<div class="wrap"><p>Sorry, you are not allowed to access ';
+    echo 'this page.</p></div>';
+  }
 }
 
 
 if (!function_exists('wp_recent_posts')) {
-// this is based almost entirely on: Recent Posts http://mtdewvirus.com/code/wordpress-plugins/ v. 1.07
+// this is based almost entirely on: Recent Posts
+// http://mtdewvirus.com/code/wordpress-plugins/ v. 1.07
 // by Nick Momrik, http://mtdewvirus.com/
-	function wp_recent_posts($count = 5, $before = '<li>', $after = '</li>', $hide_pass_post = true, $skip_posts = 0, $show_excerpts = false, $where = '', $join = '', $groupby = '') {
+	function wp_recent_posts($count = 5, $before = '<li>', $after = '</li>',
+      $hide_pass_post = true, $skip_posts = 0, $show_excerpts = false, 
+      $where = '', $join = '', $groupby = '') {
 		global $wpdb;
 		$time_difference = get_settings('gmt_offset');
 		$now = gmdate("Y-m-d H:i:s",time());
@@ -154,16 +261,21 @@ if (!function_exists('wp_recent_posts')) {
 		$groupby = apply_filters('posts_groupby', $groupby);
 		if (!empty($groupby)) { $groupby = ' GROUP BY '.$groupby; }
 	
-		$request = "SELECT ID, post_title, post_excerpt FROM $wpdb->posts $join WHERE post_status = 'publish' AND post_type != 'page' ";
+		$request = "SELECT ID, post_title, post_excerpt FROM $wpdb->posts "
+      . "$join WHERE post_status = 'publish' AND post_type != 'page' ";
 		if ($hide_pass_post) $request .= "AND post_password ='' ";
-		$request .= "AND post_date_gmt < '$now' $where $groupby ORDER BY post_date DESC LIMIT $skip_posts, $count";
+		$request .= "AND post_date_gmt < '$now' $where $groupby ORDER BY "
+      . "post_date DESC LIMIT $skip_posts, $count";
 		$posts = $wpdb->get_results($request);
 		$output = '';
 		if ($posts) {
 			foreach ($posts as $post) {
 				$post_title = stripslashes($post->post_title);
 				$permalink = get_permalink($post->ID);
-				$output .= $before . '<a href="' . $permalink . '" rel="bookmark" title="Permanent Link: ' . htmlspecialchars($post_title, ENT_COMPAT) . '">' . htmlspecialchars($post_title) . '</a>';
+				$output .= $before . '<a href="' . $permalink . '" rel="bookmark" '
+          . 'title="Permanent Link: ' 
+          . htmlspecialchars($post_title, ENT_COMPAT) . '">'
+          . htmlspecialchars($post_title) . '</a>';
 				if($show_excerpts) {
 					$post_excerpt = stripslashes($post->post_excerpt);
 					$output.= '<br />' . $post_excerpt;
@@ -183,75 +295,74 @@ function check_facebook() {
 	if (!isset($_SERVER["HTTP_USER_AGENT"])) {
 		return false;
 	}
-	if (isset($_GET['fb_sig_in_iframe']) || isset($_GET['fb_force_mode'])) {  // this just checks a simple thing
+	if (isset($_GET['fb_sig_in_iframe']) || isset($_GET['fb_force_mode'])) {  
 		return true;
 	}
 	return false;
 }
 
-// this checks if wpbook is installed and if so returns that as the theme name
-function wpbook_template($theme) {
-	if (wpbook_installed()) {
-		return apply_filters('wpbook_template', 'wp-facebook');
+function wpbook_theme_root($path) {
+	$theme_root = dirname(__FILE__);
+	if (check_facebook()) {
+		return $theme_root . '/theme'; 
+	} else {
+		return $path;
 	}
-	else {
-		return $theme;
-	}
-}
+}	
 
-// this just checks whether the theme is installed
-function wpbook_installed() {
-	return is_dir(ABSPATH.'wp-content/themes/wp-facebook');
-}
-
-// this alerts user if the theme is deleted
-if (is_admin_page() && !wpbook_installed()) {
-	global $wp_version;
-	if (isset($wp_version) && version_compare($wp_version, '2.5', '>=')) {
-		add_action('admin_notices', create_function( '', "echo '<div class=\"error\">WPBook is incorrectly installed. Please check the README.</div>';" ) );
+function wpbook_theme_root_uri($url) {
+	if (check_facebook()) {
+		$dir = get_bloginfo('wpurl') . "/wp-content/plugins/wpbook/theme";
+		return $dir;
+	} else {
+		return $url;
 	}
 }
 
-// this is the function which adds to the template and stylesheet hooks the call to wpbook_template
+// this function seems to be required by WP 2.6
+function wpbook_template_directory($value) {
+  if (check_facebook())  {
+    $theme_root = dirname(__FILE__);
+      return $theme_root . '/theme';
+    } else {
+      return $value;
+    }
+}
+ 
+  
+// this is the function which adds to the template and stylesheet hooks
+// the call to wpbook_template
 if (check_facebook()) {
-	add_action('template', 'wpbook_template');
-	add_action('option_template', 'wpbook_template');
-	add_action('option_stylesheet', 'wpbook_template');
+  add_filter('template_directory', 'wpbook_template_directory');
+	add_filter('theme_root', 'wpbook_theme_root');
+  add_filter('theme_root_uri', 'wpbook_theme_root_uri');
 }
-
+             
 // also have to change permalinks and next/prev links and more links
 function fb_filter_postlink($postlink) {
 	if (check_facebook()) {
 		$my_offset = strlen(get_option('home'));
 		$my_options = wpbook_getAdminOptions();
 		$app_url = $my_options['fb_app_url'];
-		$my_link = 'http://apps.facebook.com/' . $app_url . substr($postlink,$my_offset); 
+		$my_link = 'http://apps.facebook.com/' . $app_url 
+      . substr($postlink,$my_offset); 
 		return $my_link;
 	} else {
 		return $postlink; 
 	}
 }
-
-// point to the comments template in my dir, not active theme
-function fb_comments_template($file ='comments_facebook.php') {
-	$my_file = TEMPLATEPATH . 'comments_facebook.php';
-	if ($file == $my_file){
-		$my_file = ABSPATH . 'wp-content/themes/wp-facebook/comments_facebook.php';
-		return $my_file;
-	}
-	else {
-		return $file; 
-	}
-}
 	
 function wp_update_profile_boxes() {
-	// don't want to call update_profile.php on cron, want to do it when posts are posted
-	if (version_compare(PHP_VERSION,'5','>=')) {
-		include_once(ABSPATH. 'wp-content/themes/wp-facebook/client/facebook.php');  // php5
-	} else {
-		include_once(ABSPATH . 'wp-content/themes/wp-facebook/php4client/facebook.php');
-		include_once(ABSPATH . 'wp-content/themes/wp-facebook/php4client/facebookapi_php4_restlib.php');
-	}	
+  if(!class_exists('FacebookRestClient')) {
+    if (version_compare(PHP_VERSION,'5','>=')) {
+      include_once(ABSPATH.'wp-content/plugins/wpbook/client/facebook.php');
+	  } else {
+		  include_once(ABSPATH.'wp-content/plugins/wpbook/php4client/'
+        . 'facebook.php');
+		  include_once(ABSPATH.'wp-content/plugins/wpbook/php4client/'
+        . 'facebookapi_php4_restlib.php');
+	  }
+  }           
 	$wpbookOptions = get_option('wpbookAdminOptions');
 	
 	if (!empty($wpbookOptions)) {
@@ -261,26 +372,20 @@ function wp_update_profile_boxes() {
 	
 	$api_key = $wpbookAdminOptions['fb_api_key'];
 	$secret  = $wpbookAdminOptions['fb_secret'];
-	$app_url = $wpbookAdminOptions['app_url'];
-	$infinite_session = $wpbookAdminOptions['infinite_session'];  
 	
-	if($infinite_session) {
-		$facebook = new Facebook($api_key, $secret);
-		$facebook->api_client->session_key = $infinite_session;
+	$facebook = new Facebook($api_key, $secret);
 	
-		$url = get_bloginfo('wpurl') . "/wp-content/themes/wp-facebook/recent_posts.php?fb_sig_in_iframe";
-		// Now you can update FBML pages, update your fb:ref tags, etc.
-		$facebook->api_client->fbml_refreshRefUrl($url);	
-	}
+	$url = 	get_bloginfo('wpurl')
+    . "/wp-content/plugins/wpbook/theme/recent_posts.php?fb_sig_in_iframe";
+	// Now you can update FBML pages, update your fb:ref tags, etc.
+	$facebook->api_client->fbml_refreshRefUrl($url);	
 }
 	
-	
-	
-add_filter('comments_template','fb_comments_template',1,1);
 add_filter('post_link','fb_filter_postlink',1,1);
 add_action('admin_menu', 'wpbook_options_page');
-
+	
 // these capture new posts, not edits of previous posts	
 add_action('future_to_publish','wp_update_profile_boxes');	
 add_action('new_to_publish','wp_update_profile_boxes');
+add_action('draft_to_publish','wp_update_profile_boxes');  
 ?>
