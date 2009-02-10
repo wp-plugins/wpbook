@@ -1,43 +1,74 @@
 === WPBook ===
-Contributors: davelester, johneckman
-Donate link: http://www.davelester.org
+Contributors: johneckman, davelester, bandonrandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 0.8.2
+Stable tag: 1.1.1
 Tested up to: 2.7
 Requires at least: 2.5
 
 Plugin to embed Wordpress Blog into Facebook Platform.
 
+== Overview ==
+
+WPBook enables users to add your (self-hosted, not wordpress.com) wordpress 
+blog as a Facebook application. Facebook users will see your posts in a 
+Facebook look and feel, and can leave comments with their Facebook identity. 
+
+Comments are shared - meaning comments made by users on your blog at its 
+regular domain and comments made by users inside Facebook are all shown to 
+users of either "view" of your content. 
+
+Facebook users can also - at their option - add a profile box to their profile,
+using the "add to profile" button at the top of the default canvas page. 
+
+That profile box shows the 5 most recent posts from your blog, as links. 
+
+NOTE: These 2 plugins have been reported to conflict with WPBook:
+	- Bad Behavior 
+	- Facebook Connect (from Sociable.es)
+
+I'm working on identifying and eliminating conflict, but you should not
+try to use WPBook with either of these plugins in the current state. 
+
+Finally, if one of your other plugins (Kaltura's Interactive Video for
+example) uses CSS and sets the height of either the body or html elements
+to 100%, the auto-resizing javascript in Facebook will fail. You can 
+fix this by removing the plugin or editing the css. 
+
 == Installation ==
-1. Copy wpbook.php into your wordpress plugins folder, normally located
-   in /wp-content/plugins/
 
-2. Copy the wp-facebook directory into your themes folder, normally
-   located in /wp-content/themes/
+1. Copy the entire wpbook directory into your wordpress plugins folder,
+   /wp-content/plugins/
 
-   Note that if you use the "automated update" of plugins feature, you will 
-   need to copy the theme to the appropriate location each time an update 
-   is issued.  
+   You should have a directory structure like this:
+   /wp-content/plugins/wpbook/wpbook.php
+   /wp-content/plugins/wpbook/theme/
+   /wp-content/plugins/wpbook/client/
+   /wp-content/plugins/wpbook/php4client/
 
-3. Set up a New Application at http://www.facebook.com/developers/, obtaining
+   NOTE: If you've used previous versions, you no longer need to copy
+   the wp-facebook folder (which no longer exists) to your themes directory. 
+   
+   If you've used versions prior to 0.9.5, you can DELETE the following 
+   directory and all it's contents: 
+		/wp-content/themes/wp-facebook/ 
+
+2. Set up a New Application at http://www.facebook.com/developers/, obtaining
    a secret and API key.  
 
    Set the callback url to your blog url, including  a trailing slash. 
        (http://www.yourblogurl.com/)
-   For canvas url, you just need something unique, with no spaces, and 
-   no trailing slash. Remember it. 
+   For canvas url, you just need something *all lower case*, unique, with
+   no spaces, and no trailing slash. Remember it. 
    
    Set the application type to "website"
-   
-   Set the sidenav url to your canvas url
-   
+      
    Set the application to use an iFrame, not fbml, and to "resizable"
    (Using iFrames lets you use javascript, objects, and other tags 
     not allowed in FBML inside blog posts)
 
-4. Login to Wordpress Admin and activate the plugin
+3. Login to Wordpress Admin and activate the plugin
 
-5. Using the WPBook menu, (located under the options tag, "WPBook") fill 
+4. Using the WPBook menu, (Dashboard->Settings->WPBook) fill 
    in the appropriate information including Facebook application secret 
    and API keys, as well as your application canvas url. 
 
@@ -45,21 +76,108 @@ Plugin to embed Wordpress Blog into Facebook Platform.
    Facebook when viewing your application which allows users to send
    invites to their friends. 
 
-NOTE: If you update using the "automatic update" feature, you will
-      need to copy the theme files (in the wp-facebook subdirectory) 
-      over to wp-content/themes/ for the plugin updates to work. 
+   Comments inside Facebook can be enabled or disabled without any impact
+   on comments when your blog is viewed outside Facebook. If you have comments
+   enabled, you can optionally require users to provide their email address. 
+   (Facebook does not allow access to the user's email address, so you can 
+   really only ask users to provide one, not prefill it automatically). 
 
+   The "Give WPBook credit" option adds a line at the bottom of your Facebook
+   application pages which says "This Facebook application powered by the 
+   WPBook plugin for Wordpress" - I'd love it if you would leave this enabled
+   but it is not required.  
+
+   The "Share this post" links can also be enabled or disabled. If they are
+   enabled, they will allow the user to "share" your blog posts using the 
+   built in Facebook Share mechanism, including sending a message to friends
+   or posting in their profile. 
+
+   The "Enable 'view post at external site' link" enables a link to each blog post 
+   at your full blog url (outside Facebook). This is useful to get folks going
+   to your blog outside Facebook, to see it full size/theme etc. 
+
+   The "Link position for share button and external link button" option determines
+   where, within each post, those two links will appear - either at the top of the 
+   post (before the post content) or at the bottom of the post (after the post
+   content). 
+
+   "Enable Facebook users to add your app to their profile" will show an "Add to 
+   Profile" button for users viewing the app inside Facebook - this lets them choose
+   to add the application to their profile. 
+
+5. To add the application to "Pages" not just "Profiles" - see the instructions linked to from the "settings" page for the plugin. 
+     
 == Frequently Asked Questions ==
 
 = How do I edit the way my Facebook Application (mirrored blog) looks? =
 
-In the wp-facebook theme directory, there is an index.php file.  Most of 
+In the wpbook/theme directory, there is an index.php file.  Most of 
 what you want is there.  
 
-There's also a style.css which basically mimics Facebook's styles, as well 
-as some other files for processing comments and the like.  
+There's also a default/style.css which basically mimics Facebook's styles, 
+as well as some other files for processing comments and the like.  
 
 == Version History ==
+
+= Version 1.1.1 =
+* Fixed minor bug which broke FB resize javascript when 'add to profile'
+  option was off
+* Fixed minor bug in the description of the plugin (display). 
+
+= Version 1.1 =
+* Fixed (I hope!) Profile.setFBML issues for pages, profiles
+  Eliminated the need to copy defaultFBML into settings
+* Added option to view link in external site
+* Added option to move links (share, external) top or bottom
+* Added option to enable "add to profile"
+* Created documentation with photos
+
+= Version 1.0 =
+* Added simplexml44 library (BSD Licensed) for php4client
+* Added option for "Give Credit" 
+* Added option for "Enable Share"
+* Added option for "Allow Comments"
+* Moved "Invite Friends" to top of page
+* Cleaned up CSS for "recent posts" in main page
+* Added fix to facebookapi_php5_restlib.php which affected hosts where
+  curl libraries were not present or enabled
+* Jumped version to 1.0 - functionally complete
+
+= Version 0.9.7 =
+* template_directory deprecated in 2.7, use bloginfo('wpurl') instead
+
+= Version 0.9.6 = 
+* Clean up from moving plugin in to directory
+* Added Share button to share posts on FB
+* Added fix for conflict with other Facebook-based plugins
+
+= Version 0.9.5 = 
+* Moved plugin into wpbook dir in subversion
+* Moved theme subdirectory inside plugin subdir
+*   Required several function changes
+* Added check for existing FacebookRestClient
+
+
+= Version 0.9.4 =
+* Bug in javascript (NULL isn't the same as null) for profile
+
+= Version 0.9.3 =
+* Bug in commenting inside Facebook due to $facebook->redirect
+* Now redirects to the post on which the user commented
+* Added instruction for adding to FB Pages to settings page in WordPress
+
+= Version 0.9.2 =
+* Didn't realize I had set default FBML inside Facebook, masked a bug
+* Should now set profile FBML before calling add profile box
+
+= Version 0.9.1 =
+* Fixed xd_reciever.html versus xd_receiver.html issue
+* (You'd think a guy with a PhD in English would know how to spell.) 
+
+= Version 0.9  = 
+* Added profile boxes
+* Shows 5 most recent posts in profile box
+* Also sets FBML for "pages" profile boxes
 
 = Version 0.8.2 =
 * Added option to require email address of comment author
@@ -132,7 +250,17 @@ as some other files for processing comments and the like.
 * First push to WP-Plugins Directory
 
 == To Do ==
+* Capture Facebook Profile picture of user commenting in
+  Facebook, display instead of Gravatar. (I think this 
+  will require actually fetching and storing the picture,
+  not just its url, as it may not be available outside
+  Facebook, and may change). 
+* Deal with non-standard front pages (where user has set
+  a static page in WordPress options)
+* Add notification to wall/notes when user publishes
+  a new post - for all users, for author? 
 
 = Ongoing =
-* Option for comments or no comments in admin section
 * Better accompanying documentation
+  (Screenshots of examples, clarity on what's required
+   where, all the facebook option pages, etc)
