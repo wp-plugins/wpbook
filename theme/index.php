@@ -66,10 +66,8 @@ include_once 'config.php';
   echo "</body></html>";
 } else {
 ?>
-<script src="http://static.ak.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php"
-  type="text/javascript"></script>
+<script src="http://static.ak.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php" type="text/javascript"></script>
 
-  
 <?php if($invite_friends == "true"){
 	$invite_link = 'http://apps.facebook.com/' . $app_url 
   ."/index.php?is_invite=true&fb_force_mode=fbml";
@@ -79,7 +77,6 @@ include_once 'config.php';
   <?php if($enable_profile_link == "true"){ ?>
 <div><div id="addProfileButton" style="float:right"></div></div>
   <?php }?>
-<div>
 	<h3><a href="http://apps.facebook.com/<?php echo $app_url; ?>/" 
     target="_top"><?php bloginfo('name'); ?></a></h3>
 	<div id="content">
@@ -104,8 +101,9 @@ include_once 'config.php';
 
 
 <?php if(($enable_share == "true" || $enable_external_link == "true") && ($links_position == "top")) { 
+  echo '<p>';
 if($enable_share == "true"){?>
-<div class="wpbook_share_button">
+<span class="wpbook_share_button">
 <?php
   echo '<a onclick="window.open(\'http://www.facebook.com/sharer.php?s=100&amp;p[title]=';
   echo urlencode(get_the_title());
@@ -117,11 +115,11 @@ if($enable_share == "true"){?>
   echo ' class="share" title="Send this to friends or post it on your profile.">Share This Post</a>';
 
 ?>
-</div>
+</span>
 <?php } 
 if($enable_external_link == "true"){?>
 
-<div class="wpbook_external_post">
+<span class="wpbook_external_post">
 	<?php 
 // code to get the url of the orginal post for use in the "show external url view"
 //get the permalink
@@ -139,14 +137,17 @@ $exteral_post_url = get_bloginfo('wpurl').$external_post_permalink;
 
 //echo external post url
 echo "<a href='$exteral_post_url' title='View this post on the web at $external_site_url'>View post on $external_site_url</a>";  ?>
-</div>
+</span>
 <?php }
+  echo '</p>';
 } ?>
 			
 	<?php the_content(); ?>	
+
 <?php if(($enable_share == "true" || $enable_external_link == "true") && ($links_position == "bottom")) { 
+  echo '<p>';
 if($enable_share == "true"){?>
-<div class="wpbook_share_button">
+<span class="wpbook_share_button">
 <?php
   echo '<a onclick="window.open(\'http://www.facebook.com/sharer.php?s=100&amp;p[title]=';
   echo urlencode(get_the_title());
@@ -158,11 +159,11 @@ if($enable_share == "true"){?>
   echo ' class="share" title="Send this to friends or post it on your profile.">Share This Post</a>';
 
 ?>
-</div>
+</span>
 <?php } 
 if($enable_external_link == "true"){?>
 
-<div class="wpbook_external_post">
+<span class="wpbook_external_post">
 	<?php 
 // code to get the url of the orginal post for use in the "show external url view"
 //get the permalink
@@ -180,8 +181,9 @@ $exteral_post_url = get_bloginfo('wpurl').$external_post_permalink;
 
 //echo external post url
 echo "<a href='$exteral_post_url' title='View this post on the web at $external_site_url'>View post on $external_site_url</a>";  ?>
-</div>
+</span>
 <?php }
+  echo '</p>';
 } ?>
 	</div>	
 				<?php
@@ -207,7 +209,7 @@ echo "<a href='$exteral_post_url' title='View this post on the web at $external_
 </small></p>
 </div>
 <?php } ?>
-  <?php if($enable_profile_link =="true"){ ?>
+  <?php if($enable_profile_link == "true" ){ ?>
 <script type="text/javascript">
 	FB_RequireFeatures(["XFBML"],function() {
 		FB.Facebook.init('<?php echo $api_key; ?>',
