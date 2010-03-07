@@ -1,11 +1,13 @@
 === WPBook ===
 Contributors: johneckman, davelester, bandonrandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 1.2
-Tested up to: 2.7
-Requires at least: 2.5
+Stable tag: 1.5
+Tested up to: 2.9.2
+Requires at least: 2.6
 
 Plugin to embed Wordpress Blog into Facebook Platform.
+
+**As of 1.5, this plugin REQUIRES PHP5**
 
 == Overview ==
 
@@ -20,21 +22,28 @@ users of either "view" of your content.
 Facebook users can also - at their option - add a profile box to their profile,
 using the "add to profile" button at the top of the default canvas page. 
 
-That profile box shows the 5 most recent posts from your blog, as links. 
+That profile box shows the N most recent posts from your blog, as links. 
+(N = user configurable). 
 
-NOTE: These 2 plugins have been reported to conflict with WPBook:
-	- Bad Behavior 
-	- Facebook Connect (from Sociable.es)
+WPBook also post notifications automatically to your wall, or the wall
+of pages for which you are an admin, to which you've added the app, and 
+for which you've granted stream publish permission, when you write a new post.
 
-I'm working on identifying and eliminating conflict, but you should not
-try to use WPBook with either of these plugins in the current state. 
+WPBook *DOES NOT* (yet) do any of these:
+  - Post notifications into your users feeds (except to your wall) when you publish a post
+  - Post notifications back to a users feed when he/she posts a comment
 
-Finally, if one of your other plugins (Kaltura's Interactive Video for
-example) uses CSS and sets the height of either the body or html elements
-to 100%, the auto-resizing javascript in Facebook will fail. You can 
-fix this by removing the plugin or editing the css. 
+If you'd like to do these things, please investigate:
+ - Simplaris Blogcast (http://apps.facebook.com/flogblog/)
+ - The Facebook Notes application (for fan pages) 
+     (http://www.facebook.com/notes.php) 
+ - The Sociable Facebook Connect plugin
+     (http://www.sociable.es/facebook-connect/)
 
 == Installation ==
+
+(Note: installation instructions are also included in HTML and as a PDF
+ along with the plugin)
 
 1. Copy the entire wpbook directory into your wordpress plugins folder,
    /wp-content/plugins/
@@ -82,6 +91,9 @@ fix this by removing the plugin or editing the css.
    (Facebook does not allow access to the user's email address, so you can 
    really only ask users to provide one, not prefill it automatically). 
 
+   Similarly, you can enable or disable gravatars within Facebook
+   independent of what you do on your regular blog. 
+
    The "Give WPBook credit" option adds a line at the bottom of your Facebook
    application pages which says "This Facebook application powered by the 
    WPBook plugin for Wordpress" - I'd love it if you would leave this enabled
@@ -118,6 +130,71 @@ There's also a default/style.css which basically mimics Facebook's styles,
 as well as some other files for processing comments and the like.  
 
 == Version History ==
+
+= Version 1.5 =
+ * Now requires PHP 5
+ * Enables user to post to stream, including to pages. 
+ * Catches exceptions from Facebook client. (Doesn't yet surface those in 
+   good error messages, but at least they are caught)
+ * Fixed, I hope, issue with comments inside Facebook for some users
+ * Clean up of some admin styles (resized gravatar images as well as
+   some basic hierarchy on options)
+ * Added Pageing options as their own section
+ * Allow user to select pages to be excluded
+ * Added option to allow a menu of parent pages at top of the app
+   below the title
+ * Fixed "Facebok" typo in line line 182 of theme/index.php
+ * Option to turn on and off page list under content 
+   (independent of menu)
+ * Option to turn on/off recent post under content
+ * Allow user to set the amount of recent post to show under content (default 10)
+ * Cleaned up custom header/footer now only one function instead of two
+   (no reason to have two functions)
+ * Added %tag_links% and %category_links% to custom header footer as
+   well as made archive pages work. 
+
+= Version 1.4.2 =
+
+* Bugfix for those who install WordPress in a subdirectory, for home comment submission was failing in 1.4 and 1.4.1. 
+* Bugfix for wpbook_admin_javascript.js which included an outmoded jQuery selector syntax and broke the admin js in 2.9.1
+* Bugfix for wpbook_admin_javascript.js which included hardcoded paths assuming wp_content path relative to wp-admin (shows images for default gravatar icons by default now rather than waiting for tooltip hover)
+
+= Version 1.4.1 =
+* Doh! Typo snuck into release package. (See http://wordpres.org/support/topic/348292)
+
+= Version 1.4 =
+* Fixed bug which made invite friends link only work on the home page
+* Fixed bug in setting for custom/header footer which included a permalink
+  (See http://wordpress.org/support/topic/306263)
+* Added Gravatar support (thanks Brooke)
+* Added list of pages (thanks Brooke)
+* Removed hard coded references to wp-content and plugins directories
+  (See http://willnorris.com/2009/05/wordpress-plugin-pet-peeve-hardcoding-wp-content)
+* Removed hard coded reference to config.php
+  (See http://willnorris.com/2009/06/wordpress-plugin-pet-peeve-2-direct-calls-to-plugin-files)
+
+= Version 1.3.1 = 
+* Fix for XAMPP Windows users - add ABSPATH to include for config.php
+* Fix for users who have the application name *in* the permalink structure
+* Cleanup for images in instructions that were too wide for layout
+* Cleanup button title for submit on invite friends page
+* Remove unnecessary second 'include_once' in comments.php
+
+= Version 1.3 =
+* Mostly improvements to the admin interface user experience - better 
+  separation of options into required, customization, social, and advanced. 
+* Ability to include a custom header/footer for each post, including author,
+  date, time, category, and tags. 
+* Bugfix: No longer echoing blog name twice on the invite friends screen. 
+* Bugfix: Caught case where profile box could get updated with links to 
+  the original source (outside FB). 
+* Note: This is expected to be the final PHP4 compatible version. Facebook's 
+  client only supports PHP5, and I need to be able to wrap certain client
+  calls in Try/Catch, which requires PHP5, to avoid nasty "uncaught exception"
+  bugs. (Yes, there are unofficial PHP4 clients, but they are unsupported).
+  If someone wants to create a PHP4 only version which trails the ongoing
+  development, they are welcome to, taking this as the place from which to
+  begin a fork.  
 
 = Version 1.2 =
 * Changed the mechanism for "Add to Profile" to avoid issues with
@@ -163,7 +240,6 @@ as well as some other files for processing comments and the like.
 * Moved theme subdirectory inside plugin subdir
 *   Required several function changes
 * Added check for existing FacebookRestClient
-
 
 = Version 0.9.4 =
 * Bug in javascript (NULL isn't the same as null) for profile
@@ -257,12 +333,18 @@ as well as some other files for processing comments and the like.
 * First push to WP-Plugins Directory
 
 == To Do ==
-* Capture Facebook Profile picture of user commenting in
-  Facebook, display instead of Gravatar. (I think this 
-  will require actually fetching and storing the picture,
-  not just its url, as it may not be available outside
-  Facebook, and may change). 
+(Roughly in order of priority)
+* Leverage Facebook API to publish notifications to stream when
+  user leaves a comment (comment poster's stream and users streams)
+* Threaded comments. (If user has them enabled - requires WP 2.7.x)
+* Error handling - do something with the FB exceptions caught
+  Probably use set_transient to show - will require WP 2.8 or greater
+* Prep for WordPress 3.0 and merge with WPMU
+* Update instructions in readme to match new options available
 * Deal with non-standard front pages (where user has set
-  a static page in WordPress options)
-* Add notification to wall/notes when user publishes
-  a new post - for all users, for author? 
+  a static page in WordPress options) - right now these configurations
+  aren't really supported, and I'm not sure what support will mean - 
+  just listing posts and pages? (That actually works now if you just
+  use your wordpress home url as your canvas callback)
+* Enable pages for things like categories and tags, and enable links to 
+  those pages from the header/footer of the post 
