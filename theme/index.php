@@ -75,7 +75,7 @@ if(isset($_GET['is_permissions'])) { // we're looking for extended permissions
     $second_result = $facebook->api_client->fql_query($query);
   } catch (Exception $e) {
     if ($wpbook_show_errors) {
-      $wpbook_message = 'Caught exception in second_result query: ' . $e->$getMessage();
+      $wpbook_message = 'Caught exception in second_result query: ' . $e->getMessage();
       wp_die($wpbook_message,'WPBook Error');
     }
   }
@@ -91,7 +91,7 @@ if(isset($_GET['is_permissions'])) { // we're looking for extended permissions
           $perm = $facebook->api_client->fql_query($permissions_fql);
         } catch (Exception $e) {
           if ($wpbook_show_errors) {
-            $wpbook_message = 'Caught exception in fql_query: ' . $e->$getMessage();
+            $wpbook_message = 'Caught exception in fql_query: ' . $e->getMessage();
             wp_die($wpbook_message,'WPBook Error');
           }
         }

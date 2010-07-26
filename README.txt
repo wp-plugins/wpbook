@@ -1,7 +1,7 @@
 === WPBook ===
 Contributors: johneckman, davelester, bandonrandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 1.5.6
+Stable tag: 1.5.7
 Tested up to: 3.0
 Requires at least: 2.6
 
@@ -135,6 +135,10 @@ There's also a default/style.css which basically mimics Facebook's styles,
 as well as some other files for processing comments and the like.  
 
 == Changelog ==
+
+= 1.5.7 = 
+ * Typo in index.php, $e->$getMessage() should be $e->getMessage() 
+   (in two places - also fixed in trunk)
 
 = 1.5.6 =
  * Changed mechanism for getting pageID for publishing to page's wall. 
