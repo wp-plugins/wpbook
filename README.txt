@@ -51,7 +51,7 @@ As of 1.5, this plugin requires PHP 5.
 
 == Installation ==
 
-(Note: installation instructions are also included in HTML along with the plugin)
+(Note: installation instructions: http://wpbook.net/docs/install/ ))
 
 1. Copy the entire wpbook directory into your wordpress plugins folder,
    /wp-content/plugins/
@@ -96,6 +96,14 @@ There's also a default/style.css which basically mimics Facebook's styles,
 as well as some other files for processing comments and the like.  
 
 == Changelog ==
+
+= 2.0.7 = 
+ * Added new way to grant permissions directly for a pageID entered into
+   the wpbook settings interface. Should improve capability for folks looking
+   to publish to a page for which they aren't necessarily an admin, but
+   for which permissions can be granted
+ * Removed instructions, replaced with pointer to online version 
+   (easier to keep updated, limit size of download)
 
 = 2.0.6 =
  * Misc bug fixes: gravatar strtolower, htmlspecialchars on blog titles,
