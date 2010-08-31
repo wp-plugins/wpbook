@@ -24,7 +24,7 @@ function wpbook_safe_publish_to_facebook($post_ID) {
   $wpbook_promote_external = $wpbookAdminOptions['promote_external'];
   $wpbook_attribution_line = $wpbookAdminOptions['attribution_line'];
 	$facebook = new Facebook($api_key, $secret);
-	
+  
   $ProfileContent = '<h3>Recent posts</h3><div class="wpbook_recent_posts">'
     . '<ul>' . wpbook_profile_recent_posts(5) . '</ul></div>';
   
@@ -130,18 +130,48 @@ function wpbook_safe_publish_to_facebook($post_ID) {
   
     if(($stream_publish_pages == "true") && (!empty($target_page))) {      
       // try to publish to page
-      try { 
-        $permission = $facebook->api_client->users_hasAppPermission('publish_stream',$target_page);
+      /* If it is an application profile page, we have to pass the app id as target,
+       * and the uid of the admin as source.
+       * If it is a Fan page, we have to pass null as target, and pageid as source.
+       * not sure yet about group pages and what they take - hopefully just like
+       * profile pages
+       */
+      $fb_page_type = '';
+      try {
+        $my_fields = "type";
+        // function signature from client: $page_ids, $fields, $uid, $type
+        $fb_page_type = $facebook->api_client->pages_getinfo($target_page,'type',$target_admin,'');
       } catch (Exception $e) {
         if($wpbook_show_errors) {
-          $wpbook_message = 'Caught exception in checking extended permissions for page: ' .  $e->getMessage() .' Error code: '. $e->getCode(); 
+          $wpbook_message = 'Caught exception in getting page type for page: ' 
+          .  $target_page .' message was: '. $e->getMessage() .' Error code: '. $e->getCode(); 
           wp_die($wpbook_message,'WPBook Error');
         } // end if for show errors
-      }
-    
-      if ($permission) { 
-        // post to page
-        $fb_response = '';
+      } // end catch
+      $fb_page_type = $fb_page_type[0]['type'];  // from array back to string
+      // post to page
+      $fb_response = '';
+      if ($fb_page_type == "APPLICATION") {
+        try{
+          $fb_response = $facebook->api_client->stream_publish($message, $attachment, $action_links,$target_page,$target_page);
+        } catch (Exception $e) {
+          if($wpbook_show_errors) {
+            $wpbook_message = 'Caught exception in actually publishing to APPLICATION type page '. $target_page .': '. $e->getMessage() .' Error code: '. $e->getCode(); 
+            wp_die($wpbook_message,'WPBook Error');
+          }  // end if for show errors
+        } // end try catch
+      } 
+      if ($fb_page_type == "GROUP") {
+        try{
+          $fb_response = $facebook->api_client->stream_publish($message, $attachment, $action_links,$target_page,$target_admin);
+        } catch (Exception $e) {
+          if($wpbook_show_errors) {
+            $wpbook_message = 'Caught exception in actually publishing to GROUP type page '. $target_page .': '. $e->getMessage() .' Error code: '. $e->getCode(); 
+            wp_die($wpbook_message,'WPBook Error');
+          }  // end if for show errors
+        } // end try catch
+      } 
+      if (($fb_page_type != "GROUP") && ($fb_page_type != "APPLICATION")){
         try{
           $fb_response = $facebook->api_client->stream_publish($message, $attachment, $action_links,'',$target_page);
         } catch (Exception $e) {
@@ -150,11 +180,14 @@ function wpbook_safe_publish_to_facebook($post_ID) {
             wp_die($wpbook_message,'WPBook Error');
           }  // end if for show errors
         } // end try catch
-        if($fb_response != '') {
-          add_post_meta($my_post->ID,'_wpbook_page_stream_id',$fb_response);
-          add_post_meta($my_post->ID,'_wpbook_page_stream_time',0); // no comments imported
-        }
-      } // if permissions 
+      } // end else for if fb_page_type == APPLICATION
+      if($fb_response != '') {
+        add_post_meta($my_post->ID,'_wpbook_page_stream_id',$fb_response);
+        add_post_meta($my_post->ID,'_wpbook_page_stream_time',0); // no comments imported
+      } else {
+        $wpbook_message = 'No post id returned from Facebook, $fb_response was ' .$fb_response;
+        wp_die($wpbook_message,'WPBook Error publishing to page'); 
+      }
     } // end of if stream_publish_pages is true AND target_page non-empty
   } // end for if stream_publish OR stream_publish_pages is true
 } // end of wpbook_safe_publish_to_facebook
