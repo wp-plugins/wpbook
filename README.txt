@@ -1,7 +1,7 @@
 === WPBook ===
 Contributors: johneckman, davelester, bandonrandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.0.6
+Stable tag: 2.0.8.1
 Tested up to: 3.0.1
 Requires at least: 2.6
 
@@ -29,6 +29,9 @@ WPBook also post notifications automatically to your wall, or the wall
 of pages for which you are an admin, to which you've added the app, and 
 for which you've granted stream publish permission, when you write a new post.
 
+(This includes Application Profile pages and group walls, if you are an admin
+and have enabled fans to write on your walls). 
+
 Finally, WPBook can also import comments made on your wall (or the wall of
 a Fan page) in response to excerpts it has posted, and show those in your 
 WordPress blog as full comments. 
@@ -51,7 +54,7 @@ As of 1.5, this plugin requires PHP 5.
 
 == Installation ==
 
-(Note: installation instructions are also included in HTML along with the plugin)
+(Note: installation instructions: http://wpbook.net/docs/install/ ))
 
 1. Copy the entire wpbook directory into your wordpress plugins folder,
    /wp-content/plugins/
@@ -96,6 +99,25 @@ There's also a default/style.css which basically mimics Facebook's styles,
 as well as some other files for processing comments and the like.  
 
 == Changelog ==
+
+= 2.0.8.1 = 
+ * Ouch! Checked in version had extra whitespace before opening php tag
+ * Array checking for page type should be cleaner
+
+= 2.0.8 =
+ * Changed the "catch permissions" logic for retrieving the infinite session key
+   again - hopefully eliminate conflict with theme-my-login plugin and any other
+   plugin trying to set cookies. 
+ * Adapted logic to allow for posting to the walls of Application Profile
+   pages, Group pages, and regular Fan Pages
+
+= 2.0.7 = 
+ * Added new way to grant permissions directly for a pageID entered into
+   the wpbook settings interface. Should improve capability for folks looking
+   to publish to a page for which they aren't necessarily an admin, but
+   for which permissions can be granted
+ * Removed instructions, replaced with pointer to online version 
+   (easier to keep updated, limit size of download)
 
 = 2.0.6 =
  * Misc bug fixes: gravatar strtolower, htmlspecialchars on blog titles,

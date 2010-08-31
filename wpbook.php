@@ -1,12 +1,12 @@
 <?php
 /*
 Plugin Name: WPBook
-Plugin URI: http://www.openparenthesis.org/code/wp
-Date: 2010, August 19th
+Plugin URI: http://wpbook.net/
+Date: 2010, August 31st
 Description: Plugin to embed Wordpress Blog into Facebook Canvas using the Facebook Platform. 
 Author: John Eckman
 Author URI: http://johneckman.com
-Version: 2.0.6
+Version: 2.0.8.1
 */
   
 /*
@@ -361,13 +361,14 @@ your application's url.</p>
       echo ' id="stream_publish" > Publish new posts to YOUR Facebook Wall ';
       echo 'Profile ID: <input type="text" name="fb_admin_target" value="';
       echo htmlentities($wpbookAdminOptions['fb_admin_target']) .'" size="15" />';
-      echo '<img src="'. WP_PLUGIN_URL . '/wpbook/admin_includes/images/help.png" class="stream_publish" />';  
-      if ($wpbookAdminOptions['fb_admin_target != '') {
+      echo '<img src="'. WP_PLUGIN_URL . '/wpbook/admin_includes/images/help.png" class="stream_publish" />&nbsp;';  
+      
+      if ($wpbookAdminOptions['fb_admin_target'] != '') {
         echo '<a href="http://www.facebook.com/connect/prompt_permissions.php?api_key=';
-        echo $wpbookAdminOptions['api_key'];
+        echo $wpbookAdminOptions['fb_api_key'];
         echo '&v=1.0&next=http://apps.facebook.com/';
         echo htmlentities($wpbookAdminOptions['fb_app_url']);
-        echo '/?wpbook=catch_perms&extern=1&display=popup&ext_perm=publish_stream&enable_profile_selector=1&profile_selector_ids=';
+        echo '/?catch_permissions=true&extern=1&display=popup&ext_perm=publish_stream&enable_profile_selector=1&profile_selector_ids=';
         echo $wpbookAdminOptions['fb_admin_target'];
         echo '" target="_new">Grant Permissions for this user</a>';
       }
@@ -376,16 +377,16 @@ your application's url.</p>
       if( htmlentities($wpbookAdminOptions['stream_publish_pages']) == "true") {
         echo("checked");
       }
-      echo ' id="stream_publish_pages" > Publish new posts to the Wall of Fan Page ';
+echo ' id="stream_publish_pages" > Publish new posts to the Wall of this Fan Page, Application Profile Page, or Group: ';
       echo 'PageID: <input type="text" name="fb_page_target" value="';
       echo htmlentities($wpbookAdminOptions['fb_page_target']) .'" size="15" />'; 
-      echo '<img src="'. WP_PLUGIN_URL . '/wpbook/admin_includes/images/help.png" class="stream_publish_pages" />';
-      if ($wpbookAdminOptions['fb_page_target != '') {
+      echo '<img src="'. WP_PLUGIN_URL . '/wpbook/admin_includes/images/help.png" class="stream_publish_pages" />&nbsp;';
+      if ($wpbookAdminOptions['fb_page_target'] != '') {
         echo '<a href="http://www.facebook.com/connect/prompt_permissions.php?api_key=';
-        echo $wpbookAdminOptions['api_key'];
+        echo $wpbookAdminOptions['fb_api_key'];
         echo '&v=1.0&next=http://apps.facebook.com/';
         echo htmlentities($wpbookAdminOptions['fb_app_url']);
-        echo '/?wpbook=catch_perms&extern=1&display=popup&ext_perm=publish_stream&enable_profile_selector=1&profile_selector_ids=';
+        echo '/?catch_permissions=true&extern=1&display=popup&ext_perm=publish_stream&enable_profile_selector=1&profile_selector_ids=';
         echo $wpbookAdminOptions['fb_page_target'];
         echo '" target="_new">Grant Permissions for this page</a>';
       }
@@ -1170,15 +1171,6 @@ function wpbook_parse_request($wp) {
         wp_die("Sorry, but you can't run this plugin, it requires PHP 5 or higher.");
       }
       wpbook_safe_update_profile_boxes();
-    }
-    if($wp->query_vars['wpbook'] == 'catch_permissions') {  // do something with infinite session key
-      /* reverted to showing the infinite session key and asking user to enter
-       * into WPBook settings - all the other settings are done that way, and
-       * this avoids the oddity of trying to 'hide' it on the settings page
-       */
-      $my_session_key = $_GET['fb_sig_session_key'];
-      echo "<p>Your session key is $my_session_key.</p>";
-      echo "<p>Please copy that into the appropriate place in WPBook settings</p>";
     }
   }
 }
