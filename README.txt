@@ -1,7 +1,7 @@
 === WPBook ===
 Contributors: johneckman, davelester, bandonrandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.0.9
+Stable tag: 2.0.9.1
 Tested up to: 3.0.1
 Requires at least: 2.6
 
@@ -96,6 +96,9 @@ There's also a default/style.css which basically mimics Facebook's styles,
 as well as some other files for processing comments and the like.  
 
 == Changelog ==
+
+= 2.0.9.1 =
+ * Packaging script problem? removed htmlentities around fb author
 
 = 2.0.9 =
  * Fixed the lost navigation issue - previous and next page of posts
