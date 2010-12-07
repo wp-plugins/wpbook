@@ -2,7 +2,7 @@
 Contributors: johneckman, davelester, bandonrandon
 Tags: facebook, platform, application, blog, mirror
 Stable tag: 2.0.9.2
-Tested up to: 3.0.1
+Tested up to: 3.0.2
 Requires at least: 2.6
 
 Plugin to embed Wordpress Blog into Facebook Platform.
@@ -19,8 +19,10 @@ Comments are shared - meaning comments made by users on your blog at its
 regular domain and comments made by users inside Facebook are all shown to 
 users of either "view" of your content. 
 
-Facebook users can also - at their option - add a profile tab to their profile,
-using the "add profile tab" button at the top of the default canvas page.  
+Facebook users can also - at their option - add a profile tab to a Facebook
+page, using the "add profile tab" button at the top of the default canvas
+page. (NOTE: Facebook no longer allows the addition of tabs by applications
+to the Facebook profiles of individual users). 
 
 WPBook also post notifications automatically to your wall, or the wall
 of pages for which you are an admin, to which you've added the app, and 
@@ -51,7 +53,7 @@ As of 1.5, this plugin requires PHP 5.
 
 == Installation ==
 
-(Note: installation instructions: http://wpbook.net/docs/install/ ))
+(Note: installation instructions: http://wpbook.net/docs/install/ )
 
 1. Copy the entire wpbook directory into your wordpress plugins folder,
    /wp-content/plugins/
@@ -96,6 +98,16 @@ There's also a default/style.css which basically mimics Facebook's styles,
 as well as some other files for processing comments and the like.  
 
 == Changelog ==
+
+= 2.0.10 = 
+ * Changes by bandonrandon, see 
+   http://bandonrandon.wordpress.com/2010/10/10/wpbook-2-0-10-beta-release/
+ * Move includes into their own directory
+ * Incorporate FB avatar in comments imported
+ * New Admin Layout
+ * Bug fixes: default for 'post to facebook' is set to true
+ * Links in permissions page point to wpbook.net
+ * FB tabs view moved to its own file in theme directory
 
 = 2.0.9.2 =
  * Typo in wpbook_cron.php (defin should be define) - triggered only
