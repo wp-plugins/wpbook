@@ -41,12 +41,12 @@ if(isset($_GET['is_invite'])) { // this is the invite page
     <fb:fbml>
     <fb:title>Invite Friends</fb:title>
     <fb:request-form action="http://apps.facebook.com/<?php echo $app_url ?>" 
-      method="post" type="<? echo $app_name; ?>" 
-      content="<? echo htmlentities($content); ?>" 
-      image="<? echo $app_image; ?>"> 
+      method="post" type="<?php echo $app_name; ?>" 
+      content="<?php echo htmlentities($content); ?>" 
+      image="<?php echo $app_image; ?>"> 
     <fb:multi-friend-selector actiontext="Here are your friends who don't 
-have <? echo $app_name; ?> yet. Invite all you want - it's free!" 
-      exclude_ids="<? echo $friends; ?>" bypass="cancel" />
+have <?php echo $app_name; ?> yet. Invite all you want - it's free!" 
+      exclude_ids="<?php echo $friends; ?>" bypass="cancel" />
     </fb:request-form> 
     </fb:fbml>
     <?php
@@ -86,32 +86,30 @@ if(isset($_GET['is_permissions'])) { // we're looking for extended permissions
 <p>You've indicated you wish to publish to this page: <?php echo $wpbookAdminOptions['fb_page_target']; ?></p>
 <p><blockquote>
 <?php 
-  $permissions_fql = 'SELECT publish_stream FROM permissions WHERE uid = '. $wpbookAdminOptions['fb_page_target'] .' ';
-  try {
-    $perm = $facebook->api_client->fql_query($permissions_fql);
-  } catch (Exception $e) {
-    if ($wpbook_show_errors) {
-      $wpbook_message = 'Caught exception in fql_query: ' . $e->getMessage();
-      wp_die($wpbook_message,'WPBook Error');
+  if ($wpbookAdminOptions['fb_page_target'] != '') {
+    $permissions_fql = 'SELECT publish_stream FROM permissions WHERE uid = '. $wpbookAdminOptions['fb_page_target'] .' ';
+    try {
+      $perm = $facebook->api_client->fql_query($permissions_fql);
+    } catch (Exception $e) {
+      if ($wpbook_show_errors) {
+        $wpbook_message = 'Caught exception in fql_query: ' . $e->getMessage();
+        wp_die($wpbook_message,'WPBook Error');
+      }
     }
-  }
-  //This query will return an array as follows if the permission was found.
-  //Array ( [0] => Array ( [publish_stream] => 1 ) )
-  //If there was no permission set it will return an empty string. 
-  echo '<!-- perm was ' . $perm . ' -->'; 
-
-  if (($perm == '') || ($perm[0][publish_stream] != 1)) { 
-    echo 'This page has NOT granted stream.publish permissions to this app (OR this is an application profile page). ';
-    echo '<a href="http://www.facebook.com/connect/prompt_permissions.php?api_key=';
-    echo $api_key;
-    echo '&v=1.0&next=';
-    echo 'http://apps.facebook.com/'. urlencode($wpbookAdminOptions['fb_app_url']);
-    echo '/?catch_permissions=true&extern=1&display=popup&ext_perm=publish_stream&enable_profile_selector=1&profile_selector_ids=';
-    echo $wpbookAdminOptions['fb_page_target'];
-    echo '" target="_top">Grant stream.publish for this page</a>. ';          
-  } else { 
-    echo 'This page has granted stream.publish permissions to this app. ';
-  }   
+    echo '<!-- perm was ' . $perm . ' -->';   
+    if (($perm == '') || ($perm[0][publish_stream] != 1)) { 
+      echo 'This page has NOT granted stream.publish permissions to this app (OR this is an application profile page). ';
+      echo '<a href="http://www.facebook.com/connect/prompt_permissions.php?api_key=';
+      echo $api_key;
+      echo '&v=1.0&next=';
+      echo 'http://apps.facebook.com/'. urlencode($wpbookAdminOptions['fb_app_url']);
+      echo '/?catch_permissions=true&extern=1&display=popup&ext_perm=publish_stream&enable_profile_selector=1&profile_selector_ids=';
+      echo $wpbookAdminOptions['fb_page_target'];
+      echo '" target="_top">Grant stream.publish for this page</a>. ';          
+    } else { 
+      echo 'This page has granted stream.publish permissions to this app. ';
+    }
+ } // end if fb_page_target is set
 ?>
 </blockquote></p>
 <p>You are also listed as the admin of these pages:
@@ -223,9 +221,6 @@ if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))) {  // this i
         .'/index.php?is_invite=true&fb_force_mode=fbml" class="share"><span class="FB_UIButton_Text"><span class="FB_Bookmark_Icon"></span> Invite Friends </span></a>';
       echo '<div style="float:right; margin-left: 3px; margin-bottom: 3px;  ">'. $invite_link .'</div>';	
     } 
-    if($enable_profile_link == "true"){ 
-      echo '<div><div id="addProfileButton" style="float:right;"><fb:add-profile-tab /></div></div>';
-    }
     echo '<h3><a href="http://apps.facebook.com/'. $app_url .'/" target="_top">'. get_bloginfo('name') .'</a></h3>';
     if($show_pages_menu == "true"){
       echo '<div id="underlinemenu" class="clearfix"><ul><li>Pages:</li>';
@@ -401,20 +396,8 @@ if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))) {  // this i
       <p><small>This Facebook Application powered by <a href="http://www.wordpress.org/extend/plugins/wpbook/">the WPBook plugin</a>
       for <a href="http://www.wordpress.org/">WordPress</a>.</small></p>
       </div><?php 
-    } 
-    
-    if($enable_profile_link == "true" ){ 
-      ?>
-      <script type="text/javascript">
-        FB_RequireFeatures(["XFBML"],function() {
-          FB.Facebook.init('<?php echo $api_key; ?>',
-                     '<?php echo $receiver_url; ?>',
-                      null);
-            FB.XFBML.parse(document.getElementById('addProfileButton'));
-                           });   
-      </script>
-      <?php 
     } ?>
+        
     <script type="text/javascript">
       FB_RequireFeatures(["CanvasUtil"], function() {
                    FB.FBDebug.isEnabled=true;

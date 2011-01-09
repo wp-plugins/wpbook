@@ -1,8 +1,8 @@
 === WPBook ===
-Contributors: johneckman, davelester, bandonrandon
+Contributors: johneckman, davelester, BandonRandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.0.9.2
-Tested up to: 3.0.2
+Stable tag: 2.0.11
+Tested up to: 3.0.4
 Requires at least: 2.6
 
 Plugin to embed Wordpress Blog into Facebook Platform.
@@ -19,9 +19,9 @@ Comments are shared - meaning comments made by users on your blog at its
 regular domain and comments made by users inside Facebook are all shown to 
 users of either "view" of your content. 
 
-Facebook users can also - at their option - add a profile tab to a Facebook
-page, using the "add profile tab" button at the top of the default canvas
-page. (NOTE: Facebook no longer allows the addition of tabs by applications
+Facebook users can also add a profile tab to a Facebook page, using the 
+"add profile tab" button at the top of the default canvas page. 
+(NOTE: Facebook no longer allows the addition of tabs by applications
 to the Facebook profiles of individual users). 
 
 WPBook also post notifications automatically to your wall, or the wall
@@ -84,9 +84,6 @@ As of 1.5, this plugin requires PHP 5.
    in the appropriate information including Facebook application secret 
    and API keys, as well as your application canvas url. 
 
-Full directions included with the plugin - linked from the plugin's page or see:
-	http://www.openparenthesis.org/wp-content/plugins/wpbook/install_instructions.html
-       
 == Frequently Asked Questions ==
 
 = How do I edit the way my Facebook Application (mirrored blog) looks? =
@@ -99,12 +96,21 @@ as well as some other files for processing comments and the like.
 
 == Changelog ==
 
+= 2.0.11 = 
+ * Removed "add to profile" tab options
+ * README updates - link to instructions
+ * Conditional checking for fb_page_target to avoid 'premature end of FQL query"
+ * README updates on profile tabs
+ * Add pending_to_publish state
+ * Filter JS out of FB share link
+ * Added more debugging info
+
 = 2.0.10 = 
  * Changes by bandonrandon, see 
    http://bandonrandon.wordpress.com/2010/10/10/wpbook-2-0-10-beta-release/
  * Move includes into their own directory
  * Incorporate FB avatar in comments imported
- * New Admin Layout
+ * New Admin Layout, images
  * Bug fixes: default for 'post to facebook' is set to true
  * Links in permissions page point to wpbook.net
  * FB tabs view moved to its own file in theme directory
@@ -305,7 +311,7 @@ as well as some other files for processing comments and the like.
 * Changed the mechanism for "Add to Profile" to avoid issues with
   the fb:ref url method, using fb:ref handle instead
 * Eliminated /wpbook/theme/recent_posts.php
-* Incorporated Brandon Dukes' fixes to admins screens
+* Incorporated Brooke Dukes' fixes to admins screens
 * Added timestamp to posts
 
 = 1.1.1 =
@@ -370,16 +376,16 @@ as well as some other files for processing comments and the like.
 = 0.8.2 =
 * Added option to require email address of comment author
 * Can be set separately only for Facebook comment authors
-* Functionality added by Brandon Dukes. 
+* Functionality added by Brooke Dukes. 
 
 = 0.8.1 =
-* Oops. Typo in README.txt - Brandon Dukes.
+* Oops. Typo in README.txt - Brooke Dukes.
 * Issue with some text not being displayed
   on the invite form
 * Tested with Wordpress 2.6.2
 
 = 0.8 =
-* Thanks to Brandon Dukes for contributing facebook invites - if you
+* Thanks to Brooke Dukes for contributing facebook invites - if you
   select 'display invite friends link' checkbox in the wp-admin 
   settings for WPBook, you can invite facebook friends!
 * Display email box for commentors (optional)
