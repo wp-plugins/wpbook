@@ -1,9 +1,9 @@
 === WPBook ===
 Contributors: johneckman, davelester, BandonRandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.0.12
-Tested up to: 3.0.4
-Requires at least: 2.6
+Stable tag: 2.0.13
+Tested up to: 3.1
+Requires at least: 2.9.0
 
 Plugin to embed Wordpress Blog into Facebook Platform.
 
@@ -34,20 +34,6 @@ and have enabled fans to write on your walls).
 Finally, WPBook can also import comments made on your wall (or the wall of
 a Fan page) in response to excerpts it has posted, and show those in your 
 WordPress blog as full comments. 
-
-WPBook *DOES NOT* (yet) do any of these:
-  - Post notifications into your users feeds (except for your posts to your wall) 
-    when you publish a post
-  - Post notifications back to a users feed when he/she posts a comment
-
-If you'd like to do these things, please investigate:
- - Simplaris Blogcast (http://apps.facebook.com/flogblog/)
- - The Facebook Notes application (for fan pages) 
-     (http://www.facebook.com/notes.php) 
- - The Sociable Facebook Connect plugin
-     (http://www.sociable.es/facebook-connect/)
- - The Wordbooker Plugin
-     (http://wordpress.org/extend/plugins/wordbooker/)
 
 As of 1.5, this plugin requires PHP 5. 
 
@@ -96,10 +82,29 @@ as well as some other files for processing comments and the like.
 
 == Changelog ==
 
+= 2.1b1=
+ * Changed to Facebook Graph API, PHP SDK
+   * Posting to Profile Wall
+   * Posting to Page, App, or Group Wall
+   * OAuth authentication for Canvas
+ * Upped minimum WordPress to 2.9.0
+ * Using "featured_image" thumbnails for posting to FB wall
+ * Added Facebook Like button replacing "share" button
+   * Points to external link
+ * Updated comment import for new Graph API
+ * Updated permissions checking page for storing access_token in user_meta
+ 
+= 2.0.13 = 
  * Moved and Unhid the infinite_session_key in admin WPBook setting screen
  * Fixed attribution line function which prevented %author% from working
+ * Added global gravatar setting - otherwise we only filter gravatars
+   inside facebook. (This prevents wpbook from interfering with other
+   gravatars in themes outside fb). 
+ * Added DONOTCACHEPAGE constant when pages are viewed inside facebook - 
+   this should enable WPBook to better coordinate with wp-super-cache. 
+ * Added initial support for iFrame based tabs - still needs work
 
-=2.0.12 = 
+= 2.0.12 = 
  * Fixed regression - cron was looking for FB client in wrong directory
    (Thanks Olivier)
 
