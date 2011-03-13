@@ -109,7 +109,7 @@ function wpbook_safe_publish_to_facebook($post_ID) {
                                'h2'=> array(), 'h3'=>array(),
                                );
           $attachment['description'] = wp_kses(stripslashes(apply_filters('the_content',$my_post->post_content)),$allowedtags);
-          $fb_response = $facebook->api('/'. $target_admin .'/notes'. 'POST', $attachment);
+          $fb_response = $facebook->api('/'. $target_admin .'/notes', 'POST', $attachment);
         } else {
           // post as an excerpt
           $fb_response = $facebook->api('/'. $target_admin .'/feed', 'POST', $attachment);     
