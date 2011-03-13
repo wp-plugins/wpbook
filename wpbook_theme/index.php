@@ -2,13 +2,13 @@
 /* first include just sets up WP settings */  
 include_once(WP_PLUGIN_DIR . '/wpbook/theme/config_wp_settings.php');
 if((isset($_GET['app_tab'])) && (isset($_GET['fb_force_mode']))) {
-  // output tab in FBML mode
-  include_once(WP_PLUGIN_DIR . '/wpbook/theme/fbml_tabs.php');
+  // output tab in FBML mode to edit this change the wpbook/theme/fbml_tabs.php
+  include_once(WP_CONTENT_DIR . '/themes/wpbook_theme/fbml_tabs.php');
 }
 
 if((isset($_GET['app_tab'])) && (!isset($_GET['fb_force_mode']))) { // this is an app tab
-  // output tab in iFrame mode
-  include_once(WP_PLUGIN_DIR . '/wpbook/theme/tab.php');
+  // output tab in iFrame mode to edit this change the wpbook/theme/tabs.php
+  include_once(WP_CONTENT_DIR . '/themes/wpbook_theme/tab.php');
 } 
 
 /* this include sets up the FB client, needed for the other parts but not the tab */  
@@ -79,7 +79,8 @@ if((!isset($_GET['app_tab'])) && (isset($_GET['is_invite']))) { // this is the i
         xmlns:fb="http://www.facebook.com/2008/fbml">
   <head>
   <title><?php bloginfo('name'); ?> :: Facebook Blog Application</title>
-  <link rel="stylesheet" href="<?php echo WP_PLUGIN_URL ?>/wpbook/theme/default/style.css" 
+  <!-- why this is broken i have no clue -->
+  <link rel="stylesheet" href="<?php echo WP_CONTENT_DIR ?>/themes/wpbook_theme/style.css'" 
       type="text/css" media="screen" />
   <BASE TARGET="_top">	
   </head>
@@ -196,7 +197,7 @@ if((!isset($_GET['app_tab'])) && (isset($_GET['is_invite']))) { // this is the i
 } // end of the permissions page, now regular themed page
 
 if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))&&(!isset($_GET['app_tab']))) {  // this is the regular blog page
-  $receiver_url = WP_PLUGIN_URL . '/wpbook/theme/default/xd_receiver.html';
+  $receiver_url = WP_CONTENT_DIR .'/themes/wpbook_theme/xd_receiver.html';
   ?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
@@ -206,11 +207,12 @@ if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))&&(!isset($_GE
   <title><?php bloginfo('name'); ?> :: Facebook Blog Application</title>
   <?php if ( is_singular() ) wp_enqueue_script( 'comment-reply' ); ?>
   <?php wp_head(); ?>
-  <link rel="stylesheet" href="<?php echo WP_PLUGIN_URL ?>/wpbook/theme/default/style.css" 
-      type="text/css" media="screen" />
+  <link rel="stylesheet" type="text/css" media="all" <?php echo 'href="'. get_stylesheet_uri() .'"/>'; ?>
+
   <BASE TARGET="_top">	
   </head>
   <body>
+  <!-- in custom theme -->
   <?php
   if(isset($_GET['fb_page_id'])) { 
     echo " <div><h3>Thank You!</h3> <p>This application has been added to your page's profile.</p>";
@@ -219,7 +221,9 @@ if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))&&(!isset($_GE
     echo "</body></html>";
   }
   ?>
+  <!-- <?php echo 'stylesheet_uri is ' . get_stylesheet_uri(); ?> -->
   <div class="wpbook_header">
+  
   <?php 
   if($invite_friends == "true"){
     $invite_link = '<a class="FB_UIButton FB_UIButton_Gray FB_UIButton_CustomIcon" href="http://apps.facebook.com/' . $app_url 
@@ -227,6 +231,7 @@ if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))&&(!isset($_GE
     echo '<div style="float:right; margin-left: 3px; margin-bottom: 3px;  ">'. $invite_link .'</div>';	
   } 
   echo '<h3><a href="http://apps.facebook.com/'. $app_url .'/" target="_top">'. get_bloginfo('name') .'</a></h3>';
+  
   if(($show_pages == "true") && ($show_pages_menu == "true")){
     echo '<div id="underlinemenu" class="clearfix"><ul><li>Pages:</li>';
     if ($exclude_pages_true == "true"){
@@ -349,7 +354,7 @@ if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))&&(!isset($_GE
       
       $wpbook_next_page = get_next_posts_link();
       $wpbook_prev_page = get_previous_posts_link();        
-              
+        
       if($wpbook_prev_page || $wpbook_next_page) {
         echo '<h3 class="wpbook_box_header">More Posts</h3>'; 
         echo '<p>';
@@ -361,7 +366,7 @@ if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))&&(!isset($_GE
           echo $wpbook_next_page;
         echo '</p>';
       }
-              
+                
     endif; // if have posts	
     echo '</div>';
   } //end if else for if_page() - blog or archive 
