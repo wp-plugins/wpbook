@@ -1,22 +1,32 @@
 <?php
-// the facebook client library
-if(!class_exists('FacebookRestClient')) {
-  include_once(WP_PLUGIN_DIR . '/wpbook/includes/client/facebook.php');
+if(!class_exists('Facebook')) {  
+  include_once(WP_PLUGIN_DIR . '/wpbook/includes/client/facebook.php');  
 }
-
-$facebook = new Facebook($api_key, $secret);
-$user = $facebook->require_login(); 
-
-$params = $facebook->fb_params;
-$user_id = $params[user];
   
-// This sets the default FBML for the users profile, so that it is 
-// available for the "add to profile" button
+$canvas_page = "http://apps.facebook.com/" . $app_url . "/";
   
-// problem is that this doesn't set anything for 'pages' - if there is an
-// fb_page_id then we should try to set profile for the page, and then
-// redirect back to the page they came from?  
-if (isset($_GET['fb_page_id'])) {
-  $user_id = $_GET['fb_page_id'];
+$auth_url = "http://www.facebook.com/dialog/oauth?client_id=" 
+  . $api_key . "&redirect_uri=" . urlencode($canvas_page);
+  
+$signed_request = $_REQUEST["signed_request"];
+  
+list($encoded_sig, $payload) = explode('.', $signed_request, 2); 
+  
+$data = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+  
+if (empty($data["user_id"])) {
+  echo("<script> top.location.href='" . $auth_url . "'</script>");
+} else {
+  // need to store this somewhere, if user_id = admin
+  // and they've just granted permissions
+  $access_token = $data["oauth_token"];   
+} 
+
+/* should not store in user_meta - need to store as an option 
+ * If a wp_user id was passed in, that lets us know they came from wp
+ * And they are the $target_admin of the FB app, so we should store their ID
+ */   
+if ((isset($_REQUEST["wp_user"])) && ($data["user_id"] == $target_admin)) {
+  update_option('wpbook_user_access_token',$access_token);
 }
 ?>
