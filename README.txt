@@ -1,13 +1,17 @@
 === WPBook ===
 Contributors: johneckman, davelester, BandonRandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.0.12
-Tested up to: 3.0.4
-Requires at least: 2.6
+Stable tag: 2.1.3
+Tested up to: 3.1
+Requires at least: 2.9.0
 
 Plugin to embed Wordpress Blog into Facebook Platform.
 
 As of 1.5, this plugin requires PHP 5. 
+
+NOTE: Major changes between 2.0.x and versions 2.1 and greater. 
+Please see: http://www.openparenthesis.org/2011/03/14/wpbook-2-1-released
+for information on how to upgrade if you used 2.0.x previously. 
 
 == Description ==
 
@@ -34,20 +38,6 @@ and have enabled fans to write on your walls).
 Finally, WPBook can also import comments made on your wall (or the wall of
 a Fan page) in response to excerpts it has posted, and show those in your 
 WordPress blog as full comments. 
-
-WPBook *DOES NOT* (yet) do any of these:
-  - Post notifications into your users feeds (except for your posts to your wall) 
-    when you publish a post
-  - Post notifications back to a users feed when he/she posts a comment
-
-If you'd like to do these things, please investigate:
- - Simplaris Blogcast (http://apps.facebook.com/flogblog/)
- - The Facebook Notes application (for fan pages) 
-     (http://www.facebook.com/notes.php) 
- - The Sociable Facebook Connect plugin
-     (http://www.sociable.es/facebook-connect/)
- - The Wordbooker Plugin
-     (http://wordpress.org/extend/plugins/wordbooker/)
 
 As of 1.5, this plugin requires PHP 5. 
 
@@ -82,7 +72,13 @@ As of 1.5, this plugin requires PHP 5.
 
 4. Using the WPBook menu, (Dashboard->Settings->WPBook) fill 
    in the appropriate information including Facebook application secret 
-   and API keys, as well as your application canvas url. 
+   and app ID, as well as your application canvas url. 
+
+5. (OPTIONAL) If you'd like, copy wpbook_theme into your wp-content/themes/ 
+   directory and customize the css, or edit the html directly in 
+   index.php. If this theme (named 'WPBook') is found installed, WPBook
+   will use it rather than the built in theme. This theme will NOT 
+   be overwritten by updates unless you choose to copy it. 
 
 == Frequently Asked Questions ==
 
@@ -96,10 +92,65 @@ as well as some other files for processing comments and the like.
 
 == Changelog ==
 
+= 2.1.3 = 
+ * Bugfix: Error for fopen filename can't be empty - wasn't declaring
+   debug filename early enough in publish_to_facebook.php
+
+= 2.1.2 = 
+ * Bugfix: Don't store access_token in usermeta but in options table
+   (Impacts users who were trying to post as authors other than admin)
+ * Bugfix: Post Thumbnails was failing, resulting in random images
+ * Bugfix: ssl options for self-signed certs (impacts posting to 
+   Facebook for users on servers with self-signed ssl certs)
+ * Store separate access token and "manage_pages" permissions so that
+   we can publish to pages as pages, not as users
+
+= 2.1.1 = 
+ * Bugfix - wrap call to get_the_post_thumbnail in function_exists() so 
+   that themes which don't support it don't break
+ * If you are not using post thumbnails (because your theme doesn't
+   support it, I can't use those thumbnails to post to the wall. 
+
+= 2.1 = 
+ * Shifted from _GET and _POST to _REQUEST - to handle Facebook's changes
+   which deprecated _GET
+ * Released 2.1
+
+= 2.1b2 = 
+ * Added wpbook_theme which can be copied to themes directory, enabling
+   users to customize the theme without it getting overwritten
+   (Thanks to Brook Dukes / BandonRandon for the patch)
+   (copy the 'wpbook_theme' folder to 'wp-content/theme' and make any
+   changes to this theme. To go back to the default theme delete the
+   wpbook_theme or change the theme name in the stylesheet)
+ * Cleaned up the "More Posts" section of the index.php template
+   to not show when there is no previous or next page of posts
+ * Added capability, based on a patch supplied by @sebaxtian, to 
+   allow user to post to FB as notes rather than wall excerpts
+
+= 2.1b1=
+ * Changed to Facebook Graph API, PHP SDK
+   * Posting to Profile Wall
+   * Posting to Page, App, or Group Wall
+   * OAuth authentication for Canvas
+ * Upped minimum WordPress to 2.9.0
+ * Using "featured_image" thumbnails for posting to FB wall
+ * Added Facebook Like button replacing "share" button
+   * Points to external link
+ * Updated comment import for new Graph API
+ * Updated permissions checking page for storing access_token in user_meta
+ 
+= 2.0.13 = 
  * Moved and Unhid the infinite_session_key in admin WPBook setting screen
  * Fixed attribution line function which prevented %author% from working
+ * Added global gravatar setting - otherwise we only filter gravatars
+   inside facebook. (This prevents wpbook from interfering with other
+   gravatars in themes outside fb). 
+ * Added DONOTCACHEPAGE constant when pages are viewed inside facebook - 
+   this should enable WPBook to better coordinate with wp-super-cache. 
+ * Added initial support for iFrame based tabs - still needs work
 
-=2.0.12 = 
+= 2.0.12 = 
  * Fixed regression - cron was looking for FB client in wrong directory
    (Thanks Olivier)
 
@@ -451,10 +502,8 @@ as well as some other files for processing comments and the like.
 * First push to WP-Plugins Directory
 
 == To Do ==
-* Use featured_image instead of first image when present
 * Use settings API better / clean up settings (maybe a whole new
   box for settings in left nav? enabling sub-pages)
-* Convert to new API from Facebook for OAuth based authorization
 * Enable multi-author blogs. (Separate FB publish destinations 
   for each author? Separate FB app for each author? Filter tab 
   view to only show each author's posts?)
@@ -463,6 +512,4 @@ as well as some other files for processing comments and the like.
 * Threaded comments. (If user has them enabled - requires WP 2.7.x)
 * Error handling - do something with the FB exceptions caught
   Probably use set_transient to show - will require WP 2.8 or greater
-* Update instructions in readme to match new options available
-* Enable users to select a theme, overriding the default
-  theme/index.php for ease of updates
+

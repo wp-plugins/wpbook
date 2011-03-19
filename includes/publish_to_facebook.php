@@ -3,12 +3,14 @@
  * This function updates profile boxes and publishes to Facebook
  * In an include to avoid PHP4 based errors
  */
-function wpbook_safe_publish_to_facebook($post_ID) {  
+function wpbook_safe_publish_to_facebook($post_ID) {    
+  $debug_file= WP_PLUGIN_DIR .'/wpbook/wpbook_pub_debug.txt';
+
   if(!class_exists('FacebookRestClient')) {
     include_once(WP_PLUGIN_DIR.'/wpbook/includes/client/facebook.php');
   }           
 	$wpbookOptions = get_option('wpbookAdminOptions');
-	
+  
 	if (!empty($wpbookOptions)) {
 		foreach ($wpbookOptions as $key => $option)
 		$wpbookAdminOptions[$key] = $option;
@@ -23,8 +25,22 @@ function wpbook_safe_publish_to_facebook($post_ID) {
   $wpbook_show_errors = $wpbookAdminOptions['show_errors'];
   $wpbook_promote_external = $wpbookAdminOptions['promote_external'];
   $wpbook_attribution_line = $wpbookAdminOptions['attribution_line'];
-	$facebook = new Facebook($api_key, $secret);
+  $wpbook_as_note = $wpbookAdminOptions['wpbook_as_note'];
+
+	Facebook::$CURL_OPTS[CURLOPT_SSL_VERIFYPEER] = false;
+  Facebook::$CURL_OPTS[CURLOPT_SSL_VERIFYHOST] = 2;
   
+  
+  $facebook = new Facebook($api_key, $secret);
+  $access_token = get_option('wpbook_user_access_token');
+  
+  if($access_token == '') {
+    if(DEBUG) {
+      $fp = fopen($debug_file, 'a');
+      $debug_string=date("Y-m-d H:i:s",time())." : No access token\n";
+      fwrite($fp, $debug_string);
+    }
+  }
   if((!empty($api_key)) && (!empty($secret)) && (!empty($target_admin)) && (($stream_publish == "true") || $stream_publish_pages == "true")) {
     // here we should also post to the author's stream
     $my_post = get_post($post_ID);
@@ -59,119 +75,172 @@ function wpbook_safe_publish_to_facebook($post_ID) {
       $short_desc .= '...';
       $wpbook_description = $short_desc;
     }
-  
-    $images = get_children('post_type=attachment&post_mime_type=image&post_parent='. $my_post->ID );
-  
-    if ( $images ) {
-      $img = array();
-      foreach( $images as $imageID => $imagePost ) {
-        $img[] = wp_get_attachment_image_src($imageID);
+
+    
+    if (function_exists('get_the_post_thumbnail') && has_post_thumbnail($my_post->ID)) {
+      if(DEBUG) {
+        $fp = fopen($debug_file, 'a');
+        $debug_string=date("Y-m-d H:i:s",time())." : function exists, and this post has_post_thumbnail - post_Id is ". $my_post->ID ." \n";
+        fwrite($fp, $debug_string);
+      }      
+      $my_thumb_id = get_post_thumbnail_id($my_post->ID);
+      if(DEBUG) {
+        $fp = fopen($debug_file, 'a');
+        $debug_string=date("Y-m-d H:i:s",time())." : my_thumb_id is ". $my_thumb_id ." \n";
+        fwrite($fp, $debug_string);
       }
-      $thumb = array_pop($img);
-      $my_image = $thumb[0];
-    }
-    if(!empty($my_image)) {
-      $attachment = array( 'name' => $my_title,
-                        'href' => $my_permalink,
-                        'description' => $wpbook_description,  
-                        'comments_xid' => $post_ID, 
-                        'media' => array(array('type' => 'image', 
-                                               'src' => $my_image, 
-                                               'href' => $my_permalink,
-                                               )
-                                         ), 
-                        ); 
+      $my_thumb_array = wp_get_attachment_image_src($my_thumb_id);
+      $my_image = $my_thumb_array[0]; // this should be the url
+      if(DEBUG) {
+        $fp = fopen($debug_file, 'a');
+        $debug_string=date("Y-m-d H:i:s",time())." : my_image is ". $my_image ." \n";
+        fwrite($fp, $debug_string);
+      }
     } else {
-      $attachment = array( 'name' => $my_title,
-                        'href' => $my_permalink,
-                        'description' => $wpbook_description,  
-                        'comments_xid' => $post_ID, 
-                        ); 
+      if(DEBUG) {
+        $fp = fopen($debug_file, 'a');
+        $debug_string=date("Y-m-d H:i:s",time())." : Function does not exist, or no thumb \n";
+        fwrite($fp, $debug_string);
+      }  
+      $my_image = '';
     }
-    $action_links = array( array('text' => 'Read More',
-                               'href' => $my_permalink
-                               )
-                        ); 
-    $attachment = json_encode($attachment); 
-    $action_links = json_encode($action_links); 
-  
+
+    if(DEBUG) {
+      $fp = fopen($debug_file, 'a');
+      $debug_string=date("Y-m-d H:i:s",time())." : Post thumbail is ". $my_image ."\n";
+      fwrite($fp, $debug_string);
+    }
+    
     if($stream_publish == "true") {
+      if(DEBUG) {
+        $fp = fopen($debug_file, 'a');
+        $debug_string=date("Y-m-d H:i:s",time())." : Publish to Facebook Running\n";
+        fwrite($fp, $debug_string);
+      }
+      
       $fb_response = '';
       try{
-        $fb_response = $facebook->api_client->stream_publish($message, $attachment, $action_links,$target_admin,$target_admin);
-      } catch (Exception $e) {
+        // need new format for SDK API
+        if($wpbook_as_note) {
+          /* notes on walls don't allow much */ 
+          $allowedtags = array('img'=>array('src'=>array(), 'style'=>array()), 
+                               'span'=>array('id'=>array(), 'style'=>array()), 
+                               'a'=>array('href'=>array()), 'p'=>array(),
+                               'b'=>array(),'i'=>array(),'u'=>array(),'big'=>array(),
+                               'small'=>array(), 'ul' => array(), 'li'=>array(),
+                               'ol'=> array(), 'blockquote'=> array(),'h1'=>array(),
+                               'h2'=> array(), 'h3'=>array(),
+                               );
+          if(!empty($my_image)) {
+            /* message, picture, link, name, caption, description, source */      
+            $attachment = array( 
+                                'access_token' => $access_token,
+                                'subject' => $my_title,
+                                'link' => $my_permalink,
+                                'message' => wp_kses(stripslashes(apply_filters('the_content',$my_post->post_content)),$allowedtags),  
+                                'picture' => $my_image, 
+                                ); 
+          } else {
+            $attachment = array( 
+                                'access_token' => $access_token,
+                                'subject' => $my_title,
+                                'link' => $my_permalink,
+                                'message' => wp_kses(stripslashes(apply_filters('the_content',$my_post->post_content)),$allowedtags),  
+                                ); 
+          }
+          if(DEBUG) {
+            $fp = fopen($debug_file, 'a');
+            $debug_string=date("Y-m-d H:i:s",time())." : Publishing as note, $my_image is " . $my_image ." \n";
+            fwrite($fp, $debug_string);
+          }
+          $fb_response = $facebook->api('/'. $target_admin .'/notes', 'POST', $attachment);
+        } else {
+          // post as an excerpt
+          if(!empty($my_image)) {
+            /* message, picture, link, name, caption, description, source */      
+            $attachment = array( 
+                                'access_token' => $access_token,
+                                'name' => $my_title,
+                                'link' => $my_permalink,
+                                'description' => $wpbook_description,  
+                                'picture' => $my_image, 
+                                ); 
+          } else {
+            $attachment = array( 
+                                'access_token' => $access_token,
+                                'name' => $my_title,
+                                'link' => $my_permalink,
+                                'description' => $wpbook_description,  
+                                'comments_xid' => $post_ID, 
+                                ); 
+          }
+          $action_links = array( array('text' => 'Read More',
+                                       'href' => $my_permalink
+                                       )
+                                ); 
+          if(DEBUG) {
+            $fp = fopen($debug_file, 'a');
+            $debug_string=date("Y-m-d H:i:s",time())." : Publishing as excerpt, $my_image is " . $my_image ." \n";
+            fwrite($fp, $debug_string);
+          }
+          $fb_response = $facebook->api('/'. $target_admin .'/feed', 'POST', $attachment);     
+        }
+      } catch (FacebookApiException $e) {
         if($wpbook_show_errors) {
           $wpbook_message = 'Caught exception in stream publish for user: ' .  $e->getMessage() .'Error code: '. $e->getCode();  
           wp_die($wpbook_message,'WPBook Error');
         } // end if for show errors
       } // end try-catch
       if($fb_response != '') {
-        add_post_meta($my_post->ID,'_wpbook_user_stream_id', $fb_response);
+        add_post_meta($my_post->ID,'_wpbook_user_stream_id', $fb_response[id]);
         add_post_meta($my_post->ID,'_wpbook_user_stream_time',0); // no comments imported yet
       }  // end of if $response
     } // end of if stream_publish 
   
     if(($stream_publish_pages == "true") && (!empty($target_page))) {      
-      // try to publish to page
-      /* If it is an application profile page, we have to pass the app id as target,
-       * and the uid of the admin as source.
-       * If it is a Fan page, we have to pass null as target, and pageid as source.
-       * not sure yet about group pages and what they take - hopefully just like
-       * profile pages
-       */
-      try {
-        $my_fields = "type";
-        // function signature from client: $page_ids, $fields, $uid, $type
-        $fb_page_type_array = $facebook->api_client->pages_getinfo($target_page,'type',$target_admin,'');
-      } catch (Exception $e) {
+      // publish to page with new api
+      $fb_response = '';
+      $access_token = get_option('wpbook_page_access_token');
+      try{
+        // post as an excerpt
+        if(!empty($my_image)) {
+          /* message, picture, link, name, caption, description, source */      
+          $attachment = array( 
+                              'access_token' => $access_token,
+                              'name' => $my_title,
+                              'link' => $my_permalink,
+                              'description' => $wpbook_description,  
+                              'picture' => $my_image, 
+                              ); 
+        } else {
+          $attachment = array( 
+                              'access_token' => $access_token,
+                              'name' => $my_title,
+                              'link' => $my_permalink,
+                              'description' => $wpbook_description,  
+                              ); 
+        }
+        $action_links = array( array('text' => 'Read More',
+                                     'href' => $my_permalink
+                                     )
+                              );
+        if(DEBUG) {
+          $fp = fopen($debug_file, 'a');
+          $debug_string=date("Y-m-d H:i:s",time())." : Publishing to page, image is " . $my_image ." \n";
+          fwrite($fp, $debug_string);
+        }
+        $fb_response = $facebook->api('/'. $target_page .'/feed/','POST', $attachment); 
+      } catch (FacebookApiException $e) {
         if($wpbook_show_errors) {
-          $wpbook_message = 'Caught exception in getting page type for page: ' 
-          .  $target_page .' message was: '. $e->getMessage() .' Error code: '. $e->getCode(); 
+          $wpbook_message = 'Caught exception in publish to page ' . $e->getMessage() . ' Error code: ' . $e->getCode();
           wp_die($wpbook_message,'WPBook Error');
         } // end if for show errors
-      } // end catch
-      if (is_array($fb_page_type_array)) {
-        $fb_page_type = $fb_page_type_array[0]['type'];  // from array back to string
-      } else {
-        $fb_page_type = "PAGE";
-      }
-      // post to page
-      $fb_response = '';
-      if ($fb_page_type == "APPLICATION") {
-        try{
-          $fb_response = $facebook->api_client->stream_publish($message, $attachment, $action_links,$target_page,$target_page);
-        } catch (Exception $e) {
-          if($wpbook_show_errors) {
-            $wpbook_message = 'Caught exception in actually publishing to APPLICATION type page '. $target_page .': '. $e->getMessage() .' Error code: '. $e->getCode(); 
-            wp_die($wpbook_message,'WPBook Error');
-          }  // end if for show errors
-        } // end try catch
-      } 
-      if ($fb_page_type == "GROUP") {
-        try{
-          $fb_response = $facebook->api_client->stream_publish($message, $attachment, $action_links,$target_page,$target_admin);
-        } catch (Exception $e) {
-          if($wpbook_show_errors) {
-            $wpbook_message = 'Caught exception in actually publishing to GROUP type page '. $target_page .': '. $e->getMessage() .' Error code: '. $e->getCode(); 
-            wp_die($wpbook_message,'WPBook Error');
-          }  // end if for show errors
-        } // end try catch
-      } 
-      if (($fb_page_type != "GROUP") && ($fb_page_type != "APPLICATION")){
-        try{
-          $fb_response = $facebook->api_client->stream_publish($message, $attachment, $action_links,'',$target_page);
-        } catch (Exception $e) {
-          if($wpbook_show_errors) {
-            $wpbook_message = 'Caught exception in actually publishing to page '. $target_page .': '. $e->getMessage() .' Error code: '. $e->getCode(); 
-            wp_die($wpbook_message,'WPBook Error');
-          }  // end if for show errors
-        } // end try catch
-      } // end else for if fb_page_type == APPLICATION
+      } // end try/catch for publish to page
       if($fb_response != '') {
-        add_post_meta($my_post->ID,'_wpbook_page_stream_id',$fb_response);
+        add_post_meta($my_post->ID,'_wpbook_page_stream_id',$fb_response[id]);
         add_post_meta($my_post->ID,'_wpbook_page_stream_time',0); // no comments imported
       } else {
-        $wpbook_message = 'No post id returned from Facebook, $fb_response was ' .$fb_response;
+        $wpbook_message = 'No post id returned from Facebook, $fb_response was ' . print_r($fb_response,true) . '/n';
         $wpbook_message = $wpbook_message . ' and $fb_page_type was ' . $fb_page_type;
         $wpbook_message .= ' and $wpbook_description was ' . $wpbook_description;
         $wpbook_message .= ' and $my_title was ' . $my_title;
