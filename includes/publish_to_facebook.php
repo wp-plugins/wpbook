@@ -45,7 +45,7 @@ function wpbook_safe_publish_to_facebook($post_ID) {
     // here we should also post to the author's stream
     if(DEBUG) {
       $fp = fopen($debug_file, 'a');
-      $debug_string=date("Y-m-d H:i:s",time())." : publish_to_facebook running, target_admin is " . $target_admin "\n";
+      $debug_string=date("Y-m-d H:i:s",time())." : publish_to_facebook running, target_admin is " . $target_admin ."\n";
       fwrite($fp, $debug_string);
     }
     
@@ -234,7 +234,6 @@ function wpbook_safe_publish_to_facebook($post_ID) {
       // publish to page with new api
       $fb_response = '';
       $access_token = get_option('wpbook_page_access_token');
-      
       if(DEBUG) {
         $fp = fopen($debug_file, 'a');
         $debug_string=date("Y-m-d H:i:s",time())." : Page access token is ". $access_token ."\n";
