@@ -2,12 +2,12 @@
 /*
 Plugin Name: WPBook
 Plugin URI: http://wpbook.net/
-Date: 2010, September 11th
+Date: 2011, March 27th
 Description: Plugin to embed Wordpress Blog into Facebook Canvas using the Facebook Platform. 
 Author: John Eckman
 Author URI: http://johneckman.com
-Version: 2.1.4
-Stable tag: 2.1.4
+Version: 2.2
+Stable tag: 2.2
 
 */
   
@@ -109,7 +109,8 @@ function setAdminOptions($wpbook_installation, $fb_api_key, $fb_secret,
                          $approve_imported_comments,$num_days_import,
                          $imported_comments_email,$infinite_session_key,
                          $attribution_line,$wpbook_enable_debug,
-                         $wpbook_use_global_gravatar,$wpbook_as_note) {
+                         $wpbook_use_global_gravatar,$wpbook_as_note,
+                         $wpbook_target_group, $wpbook_disable_sslverify) {
   $wpbookAdminOptions = array('wpbook_installation' => $wpbook_installation,
                               'fb_api_key' => $fb_api_key,
                               'fb_secret'  => $fb_secret,
@@ -153,7 +154,9 @@ function setAdminOptions($wpbook_installation, $fb_api_key, $fb_secret,
                               'attribution_line' => $attribution_line,
                               'wpbook_enable_debug' => $wpbook_enable_debug,
                               'wpbook_use_global_gravatar' => $wpbook_use_global_gravatar,
-                              'wpbook_as_note' => $wpbook_as_note
+                              'wpbook_as_note' => $wpbook_as_note,
+                              'wpbook_target_group' => $wpbook_target_group,
+                              'wpbook_disable_sslverify' => $wpbook_disable_sslverify, 
                               );
   update_option('wpbookAdminOptions', $wpbookAdminOptions);
 }
@@ -201,13 +204,13 @@ function wpbook_subpanel() {
     get_currentuserinfo();
     
     $wpbookAdminOptions = wpbook_getAdminOptions();
-    if (isset($_POST['fb_api_key']) && isset($_POST['fb_secret']) && isset($_POST['fb_app_url']) 
-      && (!empty($_POST['fb_api_key']))  && (!empty($_POST['fb_secret'])) && (!empty($_POST['fb_app_url']))) { 
-      $fb_api_key = $_POST['fb_api_key'];
+    if (isset($_POST['fb_api_key']) && isset($_POST['fb_secret']) && isset($_POST['fb_app_url']) && isset($_POST['fb_admin_target']) 
+      && (!empty($_POST['fb_api_key']))  && (!empty($_POST['fb_secret'])) && (!empty($_POST['fb_app_url'])) && (!empty($_POST['fb_admin_target']))) { 
+      $fb_api_key = preg_replace("#[^0-9]#", "",$_POST['fb_api_key']);
       $fb_secret = $_POST['fb_secret'];
       $fb_app_url = $_POST['fb_app_url'];
-      $fb_admin_target = $_POST['fb_admin_target'];
-      $fb_page_target = $_POST['fb_page_target'];
+      $fb_admin_target = preg_replace("#[^0-9]#", "",$_POST['fb_admin_target']);
+      $fb_page_target = preg_replace("#[^0-9]#", "",$_POST['fb_page_target']);
       $invite_friends = $_POST['invite_friends'];
       $require_email = $_POST['require_email'];
       $give_credit = $_POST['give_credit'];
@@ -238,23 +241,25 @@ function wpbook_subpanel() {
       $show_pages_menu = $_POST['show_pages_menu'];
       $show_pages_list = $_POST['show_pages_list'];
       $show_recent_post_list = $_POST['show_recent_post_list'];
-      $recent_post_amount = ereg_replace("[^0-9]", "",$_POST['recent_post_amount_input']); 
+      $recent_post_amount = preg_replace("#[^0-9]#", "",$_POST['recent_post_amount_input']); 
       $stream_publish = $_POST['stream_publish'];  
       $stream_publish_pages = $_POST['stream_publish_pages'];
       $show_errors = $_POST['show_errors'];  
       $promote_external = $_POST['promote_external'];
       $import_comments = $_POST['import_comments'];
       $approve_imported_comments = $_POST['approve_imported_comments'];
-      $num_days_import = $_POST['num_days_import'];  
+      $num_days_import = preg_replace("#[^0-9]#", "",$_POST['num_days_import']);  
       $imported_comments_email = $_POST['imported_comments_email'];  
       $infinite_session_key = $_POST['infinite_session_key']; 
       $attribution_line = $_POST['attribution_line'];
       $wpbook_enable_debug = $_POST['wpbook_enable_debug'];
       $wpbook_as_note = $_POST['wpbook_as_note'];
+      $wpbook_target_group = $_POST['wpbook_target_group'];
+      $wpbook_disable_sslverify = $_POST['wpbook_disable_sslverify'];
       $wpbook_use_global_gravatar = $_POST['wpbook_use_global_gravatar'];
       // Handle custom gravatar_deault code modified from wp-admin/options.php
       if ( !empty($_POST['gravatar_default']) && isset($_POST['gravatar_rating_custom']) && '\c\u\s\t\o\m' == stripslashes( $_POST['gravatar_default'] ) )
-        $_POST['gravatar_default'] = urlencode($_POST['gravatar_rating_custom']);
+        $_POST['gravatar_default'] = $_POST['gravatar_rating_custom'];
       //end custom gravatar_deafult code
       			
       $gravatar_default = $_POST['gravatar_default'];
@@ -285,10 +290,11 @@ function wpbook_subpanel() {
                     $import_comments,$approve_imported_comments,$num_days_import,
                     $imported_comments_email,$infinite_session_key,
                     $attribution_line,$wpbook_enable_debug,
-                    $wpbook_use_global_gravatar,$wpbook_as_note);
+                    $wpbook_use_global_gravatar,$wpbook_as_note,
+                    $wpbook_target_group,$wpbook_disable_sslverify);
       $flash = "Your settings have been saved. ";
-    } elseif (($wpbookAdminOptions['fb_api_key'] != "") || ($wpbookAdminOptions['fb_secret'] != "") || ($wpbookAdminOptions['fb_app_url'] != "")
-            || (!empty($_POST['fb_api_key']))  || (!empty($_POST['fb_secret'])) || (!empty($_POST['fb_app_url']))){
+    } elseif (($wpbookAdminOptions['fb_api_key'] != "") && ($wpbookAdminOptions['fb_secret'] != "") && ($wpbookAdminOptions['fb_app_url'] != "") && ($wpbookAdminOptions['fb_admin_target'] != "")
+            && (!empty($_POST['fb_api_key']))  && (!empty($_POST['fb_secret'])) && (!empty($_POST['fb_app_url'])) && (!empty($_POST['fb_admin_target']))){
       $flash = "";
     } else {
       $flash = "Please complete all necessary fields";}
@@ -303,12 +309,11 @@ function wpbook_subpanel() {
         $gravatar_default = WP_PLUGIN_URL .'/wpbook/theme/default/gravatar_default.gif';
         setAdminOptions(1, null,null,null,null,null,true,true,true,true,true,top,null,null,"F j, Y","g:i a",
                         true,null,null,null,disabled,null,"g",$gravatar_default,null,null,null,null,true,true,10,
-                        false,false,false,false,false,false,7,"facebook@openparenthesis.org",null,null,null,false,false);
+                        false,false,false,false,false,false,7,"facebook@openparenthesis.org",null,null,null,false,false,null,false);
       }
       if ($flash != '') echo '<div id="message"class="updated fade">'
         . '<p>' . $flash . '</p></div>'; 
 	$plugin_url = WP_PLUGIN_URL.'/wpbook';
-	
       ?>
       <script>
 	jQuery(document).ready(function(){
@@ -324,34 +329,61 @@ function wpbook_subpanel() {
 			<a href="http://wpbook.net/"><img src="<?php echo $plugin_url; ?>/admin_includes/images/wpbook_logo.png"></a>
 		</div>
 		<div class="wpbook_top_text">
-			      <p>This plugin allows you to embed your blog into the Facebook canvas,
-  allows Facebook users to comment on or share your blog posts, cross-posts your 
+    <p>This plugin allows you to embed your blog into the Facebook canvas, allows
+  Facebook users to comment on or share your blog posts, cross-posts your 
   blog posts to the wall of your profile, a fan page, an application profile page,
   or a group page, and enables you to add a tab for your fan page. It also imports
   comments made against wall posts which originated in WordPress.</p>
 <p><a href="http://wpbook.net/docs/install/" target="_blank">Detailed instructions</a></p>
+<?php 
+  if(!empty($wpbookAdminOptions['fb_app_url']) && !empty($wpbookAdminOptions['fb_secret']) 
+  && !empty($wpbookAdminOptions['fb_api_key']) && !empty($wpbookAdminOptions['fb_admin_target'])) {  
+    echo '<p>If you are having issues, please begin by <a href="http://apps.facebook.com/'
+    . htmlentities($wpbookAdminOptions['fb_app_url']) .'/?is_permissions=true&wp_user='
+    .$current_user->ID .'">Checking '
+    . 'permissions</a> for stream publishing, reading, and offline access.</p>';  }
+  
+  ?>
   </div>
 	</div>
 	<!-- START Required Options --> 
 	<h3 class="div_wpbook_toggle" id="wpbook_required">Required Settings <span class="div_wpbook_toggle_icon">+</span></h3>
 	<div class="div_wpbook" id="div_wpbook_required">
-	 <p>To use this plugin, you must register for an API key at <a href="http://www.facebook.com/developers/">Facebook</a>.
-	 Follow the link and click "set up a new application."  After you've obtained the 
-	 necessary info, fill in both your application's API and Secret keys as well as 
-	 your application's url.</p>
+	 <p>To use this plugin, you must <a href="http://www.facebook.com/developers/createapp.php">create
+   a Facebook application</a>. After you've obtained the necessary info, fill in
+   both your application's App_ID and Secret keys as well as your application's
+   url and your Facebook profile ID.</p>
       <p>Note: Your "Canvas Callback URL" setting in Facebook should be: 
       <?php
       echo '<code>' . get_bloginfo('url') . '</code></p>'; 
       echo '<form action="'. $_SERVER["REQUEST_URI"] .'" method="post">'; 
       echo '<p>Facebook App ID: <input type="text" name="fb_api_key" value="';
-      echo htmlentities($wpbookAdminOptions['fb_api_key']) .'" size="35" /></p>';
-      echo '<p>Facebook Secret: ';
+echo htmlentities($wpbookAdminOptions['fb_api_key']) .'" size="35" />';
+      if(!empty($wpbookAdminOptions['fb_api_key'])) {
+echo ' <a href="http://www.facebook.com/apps/application.php?id=' . $wpbookAdminOptions['fb_api_key'] . '" target="_new"> Visit this app profile</a>';
+      }
+
+      echo '</p>';
+      echo '<p>Facebook App Secret: ';
       echo '<input type="text" name="fb_secret" value="';
       echo htmlentities($wpbookAdminOptions['fb_secret']) .'" size="35" /></p>';
+      echo '<p>YOUR Facebook Profile ID: <input type="text" name="fb_admin_target" value="';
+      echo preg_replace("#[^0-9]#","",htmlentities($wpbookAdminOptions['fb_admin_target'])) .'" size="15" />';
+      if(!empty($wpbookAdminOptions['fb_admin_target'])) {
+        echo ' <a href="http://www.facebook.com/profile.php?id=' . $wpbookAdminOptions['fb_admin_target'] . '" target="_new">visit this profile</a>';
+      }
+      
+      echo '</p><p>Note: if you don\'t know your ID you can get it by visiting <a href="http://graph.facebook.com/USERNAME" target="_blank">http://graph.facebook.com/YOUR_USERNAME</a> <br/>Replacing the "YOUR_USERNAME" 
+      with your Facbook login. (More info on <a href="http://socialmediaseo.net/2010/02/20/how-to-find-facebook-id/">finding your Page ID</a>).'; 
+      echo '</p>';
       echo '<p>Facebook Canvas Page URL, ';
       echo '<strong>NOT</strong> INCLUDING "http://apps.facebook.com/" ';
       echo '<input type="text" name="fb_app_url" value="';
-      echo htmlentities($wpbookAdminOptions['fb_app_url']) .'" size="20" /></p>'; 
+      echo htmlentities($wpbookAdminOptions['fb_app_url']) .'" size="20" />';
+if(!empty($wpbookAdminOptions['fb_app_url'])) {
+  echo ' <a href="http://apps.facebook.com/' . $wpbookAdminOptions['fb_app_url'] . '" target="_new">Visit this canvas page</a>';
+}
+      echo '</p>'; 
   ?></div> <!-- END Required Options --> 
 	<pre><?php print_r(get_option('wpbook_admin_options')); ?></pre>
 		
@@ -359,41 +391,49 @@ function wpbook_subpanel() {
 	<h3 class="div_wpbook_toggle" id="wpbook_stream">Stream/Wall Options <span class="div_wpbook_toggle_icon">+</span> </h3>
 	<div class="div_wpbook" id="div_wpbook_stream">
 	<?php 
-      if(empty($wpbookAdminOptions['fb_app_url']) || empty($wpbookAdminOptions['fb_secret']) || empty($wpbookAdminOptions['fb_api_key'])) {  
+      if(empty($wpbookAdminOptions['fb_app_url']) || empty($wpbookAdminOptions['fb_secret']) || empty($wpbookAdminOptions['fb_api_key']) || empty($wpbookAdminOptions['fb_admin_target'])) {  
         echo '<p><strong>Once your Facebook application is established by filling out the required information, return to edit streaming options.</strong></p>';
       } 
       else {  
         echo '<p>These settings all impact how WPBook publishes to Facebook walls, and depend on appropriate permissions being set in Facebook.</p>';
-        echo '<a href="http://apps.facebook.com/' . htmlentities($wpbookAdminOptions['fb_app_url']) .'/?is_permissions=true&wp_user='. $current_user->ID .'">Check '
-          . 'permissions</a> for stream publishing, reading, and offline access.';
-        echo '<p class="wpbook_hidden wpbook_option_set_1 sub_options">Publish as Notes: <input type="checkbox" name="wpbook_as_note" ';
-        if($wpbookAdminOptions['wpbook_as_note']) 
-          echo 'checked';
-        echo ' ></p>';
+        echo '<p>If you are having issues, please begin by <a href="http://apps.facebook.com/' . htmlentities($wpbookAdminOptions['fb_app_url']) .'/?is_permissions=true&wp_user='. $current_user->ID .'">Checking '
+        . 'permissions</a> for stream publishing, reading, and offline access.</p>';
         echo '<p><strong>Stream Profile/Page Options</strong><br/>
-        <input type="checkbox" name="stream_publish" value="true" ';
+        <p><input type="checkbox" name="stream_publish" value="true" ';
         if( htmlentities($wpbookAdminOptions['stream_publish']) == "true") {
           echo("checked");
         }
-        echo ' id="set_1" > Publish new posts to YOUR Facebook Wall ';
-        echo '<p class="wpbook_hidden wpbook_option_set_1 sub_options">YOUR Profile ID: <input type="text" name="fb_admin_target" value="';
-        echo htmlentities($wpbookAdminOptions['fb_admin_target']) .'" size="15" /> ';  
-        echo '</p>';
+        echo ' id="set_1"> Publish new posts to <a href="http://www.facebook.com/profile.php?id=' . $wpbookAdminOptions['fb_admin_target'] .'" target="_new">YOUR Facebook Wall</a></p> ';
+        echo '<p class="wpbook_hidden wpbook_option_set_1 sub_options"><input type="checkbox" name="wpbook_as_note" ';
+        if($wpbookAdminOptions['wpbook_as_note']) 
+          echo 'checked';
+        echo ' > Publish as Notes (rather than excerpts - applies only to individual profiles)</p>';
+        
         echo '<p><input type="checkbox" name="stream_publish_pages" value="true" ';
         if( htmlentities($wpbookAdminOptions['stream_publish_pages']) == "true") {
           echo("checked");
         }
-echo ' id="set_2" > Publish new posts to the Wall of this Fan Page, Application Profile Page, or Group: ';
-echo '<p class="wpbook_hidden wpbook_option_set_2 sub_options">PageID: <input type="text" name="fb_page_target" value="';
-      echo htmlentities($wpbookAdminOptions['fb_page_target']) .'" size="15" /> ';
-      echo '</p>';
+        echo ' id="set_2" > Publish new posts to the wall of this page/group: ';
+echo '<p class="wpbook_hidden wpbook_option_set_2 sub_options">Page ID: <input type="text" name="fb_page_target" value="';
+      echo preg_replace("#[^0-9]#","",htmlentities($wpbookAdminOptions['fb_page_target'])) .'" size="15" /> ';
+      echo ' (Information on <a href="http://socialmediaseo.net/2010/02/20/how-to-find-facebook-id/">finding your Page ID</a>)</p>';
+      
+      echo '<p class="wpbook_hidden wpbook_option_set_2 sub_options">Group ID: <input type="text" name="wpbook_target_group" value="';
+        echo preg_replace("#[^0-9]#","",htmlentities($wpbookAdminOptions['wpbook_target_group'])) .'" size="15" /> ';
+        echo ' (Generally your GroupID should be in your url, like: http://www.facebook.com/group.php?gid=149948248362737 - the gid is the group ID). </p>';
+        
+
       echo '<p><input type="checkbox" name="promote_external" value="true" ';
       if( htmlentities($wpbookAdminOptions['promote_external']) == "true") {
         echo("checked");
       }
-      echo ' id="promote_external" > Use external permalinks on Walls </p>';
-       echo '<p>Attribution line: <input type="text" name="attribution_line" size="40" value="'. $wpbookAdminOptions['attribution_line'] .'" /><br />';
-      echo 'Predefined Strings (you can use these in your attribution line): <code>%author%, %blogname%</code>.</p>';
+      echo ' id="promote_external" > Use external permalinks on Walls (applies to profiles, pages, and groups)</p>';
+      
+      /* using the new Graph API, there's nowhere to put attribution strings
+       * So I'm just hiding this for now
+       */
+      //echo '<p>Attribution line: <input type="text" name="attribution_line" size="40" value="'. $wpbookAdminOptions['attribution_line'] .'" /><br />';
+      //echo 'Predefined Strings (you can use these in your attribution line): <code>%author%, %blogname%</code>.</p>';
 
       echo '<p><strong>Stream Debug Options</strong><br/><input type="checkbox" name="wpbook_enable_debug" value="true" ';
       if( htmlentities($wpbookAdminOptions['wpbook_enable_debug']) == "true") {
@@ -405,6 +445,13 @@ echo '<p class="wpbook_hidden wpbook_option_set_2 sub_options">PageID: <input ty
         echo("checked");
       }
       echo ' id="show_errors" > Show errors posting to Facebook Stream </p>';
+        
+        echo '<p><input type="checkbox" name="wpbook_disable_sslverify" value="true" ';
+        if( htmlentities($wpbookAdminOptions['wpbook_disable_sslverify']) == "true") {
+          echo("checked");
+        }
+        echo ' id="wpbook_disable_sslverify" > Disable Facebook SSL verification</p>';
+  
 
       echo '<p><strong>Stream Comment Options</strong><br/>
       <input type="checkbox" name="import_comments" value="1" ';
@@ -496,7 +543,7 @@ echo '<p class="wpbook_hidden wpbook_option_set_5 sub_child_options"> Gravatar D
       checked( $gravatar_defaults_custom, TRUE );
       echo '/> Custom: 
             <p class="wpbook_hidden wpbook_option_set_5 sub_child_options">  <input type="text" size="70" class="gravatar_rating_custom" name="gravatar_rating_custom"'; 
-      if($gravatar_defaults_custom === TRUE){echo 'value= '. urldecode($wpbookAdminOptions['gravatar_default']);}
+      if($gravatar_defaults_custom === TRUE){echo 'value= '. $wpbookAdminOptions['gravatar_default'];}
       echo'/></p>';
       //gravatar outside Facebook
         echo'<p class="wpbook_hidden wpbook_option_set_5 sub_child_options"> <input type="checkbox" name="wpbook_use_global_gravatar" value="true"';
@@ -647,7 +694,7 @@ echo '<p class="wpbook_hidden wpbook_option_set_5 sub_child_options"> Gravatar D
       }
       echo '> Show a list of recent post below content </p>'
             .'<p class="wpbook_option_set_10 wpbook_hidden sub_child_options">How many? <input type="text" size="20" name="recent_post_amount_input"'; 
-      echo 'value= '. ereg_replace("[^0-9]","", $wpbookAdminOptions['recent_post_amount']);
+      echo 'value= '. preg_replace("[0-9]","", $wpbookAdminOptions['recent_post_amount']);
       echo '  /></p> '; 
       
       
@@ -901,18 +948,17 @@ function wpbook_template_directory($value) {
 //check to see if the user has a custom theme in their theme folder
 function wpbook_check_custom_theme($theme) {
 	global $wp_version;
-  if (version_compare($wp_version, '3.1', '>=')) {
+  if (version_compare($wp_version, '3.1', '>=')) { // get_themes() crashes WP < 3.1
     $installed_themes= array();
     $installed_themes= get_themes();
     $wpbook_theme_check = (!empty($installed_themes[$theme])) ? TRUE : FALSE;
     return $wpbook_theme_check;
-  } else {
-	if(file_exists(WP_CONTENT_DIR . '/themes/wpbook_theme/style.css')){
-		return TRUE;
-	}
+  } else { // this check works before 3.1
+    if(file_exists(WP_CONTENT_DIR . '/themes/wpbook_theme/style.css')){ 
+      return TRUE; 
+    }
   }
-
-    return FALSE; // custom theme check fails in wordpress < 3.1
+  return FALSE;  // no custom theme found
 }
   
 // this is the function which adds to the template and stylesheet hooks
