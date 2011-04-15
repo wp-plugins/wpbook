@@ -1,7 +1,7 @@
 === WPBook ===
 Contributors: johneckman, davelester, BandonRandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.2.1
+Stable tag: 2.2.3
 Tested up to: 3.1
 Requires at least: 2.9.0
 
@@ -90,6 +90,34 @@ There's also a default/style.css which basically mimics Facebook's styles,
 as well as some other files for processing comments and the like.  
 
 == Changelog ==
+
+= 2.2.3 =
+ * Bugfix: User should not have to be logged in to view the fanpage
+   tab. This means hiding the 'invite friends' link on that tab, which 
+   makes sense since the user should really 'like' that page, not
+   invite people to the app - that makes sense on the app canvas
+   page instead
+ * Bugfix: Moved from 'like' button back to 'share this post' for the
+   page tabs as well. The 'like' doesn't really work effectively 
+   inside FB pages/apps - always just points to the app not the post
+ * Bugfix: Support https mode. (Thanks to patch from cshiflet). 
+   In order for https mode to work, of course, your blog must be
+   accessible under an https url, but if you have https working
+   on your blog WPBook will continue to operate for users browsing
+   facebook under https. 
+
+= 2.2.2 = 
+ * Bugfix: fwrite errors for supplied argument is not a valid stream resource
+ * Reverted from "like" button to "share" button for canvas pages within
+   application. Although Facebook is phasing out the share button, the like
+   button they want to replace it doesn't yet work inside app pages. 
+   They default the og:url to the canvas page, which means all your likes
+   point to the app, not the specific post
+ * If posts have a "featured image" / "post thumbnail" defined, that 
+   post thumbnail is passed through the share link
+ * Added a 'wpbook_attachment' filter for other plugins to use
+ * Added a functions.php to the wpbook theme so that it could natively
+   support the post_thumbnails in index.php
 
 = 2.2.1 =
  * Something wrong in checked in copy - cleanup release

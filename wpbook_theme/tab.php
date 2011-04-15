@@ -13,12 +13,12 @@ type="text/css" media="screen" />
 <body>
   <div id="content">
     <?php 
-      if($invite_friends == "true"){
-        $invite_link = '<a class="FB_UIButton FB_UIButton_Gray FB_UIButton_CustomIcon" href="http://apps.facebook.com/' . $app_url 
+      if((!empty($data["user_id"])) && ($invite_friends == "true")) {
+        $invite_link = '<a class="FB_UIButton FB_UIButton_Gray FB_UIButton_CustomIcon" href="'. $proto .'://apps.facebook.com/' . $app_url 
         .'/index.php?is_invite=true&fb_force_mode=fbml" class="share"><span class="FB_UIButton_Text"><span class="FB_Bookmark_Icon"></span> Invite Friends </span></a>';
         echo '<div style="float:right; margin-left: 3px; margin-bottom: 3px;  ">'. $invite_link .'</div>';	
       } 
-      echo '<h3><a href="http://apps.facebook.com/'. $app_url .'/" target="_top">'. get_bloginfo('name') .'</a></h3>';
+      echo '<h3><a href="'. $proto .'://apps.facebook.com/'. $app_url .'/" target="_top">'. get_bloginfo('name') .'</a></h3>';
       if(($show_pages == "true") && ($show_pages_menu == "true")){
         echo '<div id="underlinemenu" class="clearfix"><ul><li>Pages:</li>';
         if ($exclude_pages_true == "true"){
@@ -94,14 +94,25 @@ type="text/css" media="screen" />
   if(($enable_share == "true" || $enable_external_link == "true") && ($links_position == "top")) { 
     echo '<p>';
     if($enable_share == "true"){
-      ?><span class="wpbook_share_button">
-      <script src="http://connect.facebook.net/en_US/all.js#xfbml=1"></script>
-      <fb:like href="<?php the_permalink(); ?>" show_faces="true" width="150">
-      </fb:like> 
-      </span>
-      <?php                
-  } // end if for enable_share
-  if($enable_external_link == "true"){ 
+      ?><span class="wpbook_share_button"><?php
+        echo '<a onclick="window.open(\'http://www.facebook.com/sharer.php?s=100&amp;p[title]=';
+        echo urlencode(get_the_title());
+        echo '&amp;p[summary]=';
+        echo urlencode((wp_filter_nohtml_kses(apply_filters('the_content',get_the_excerpt()))));
+        if((function_exists('has_post_thumbnail')) && (has_post_thumbnail())) {
+          $my_thumb_id = get_post_thumbnail_id();
+          $my_thumb_array = wp_get_attachment_image_src($my_thumb_id);
+          $my_image = $my_thumb_array[0]; // this should be the url                
+          echo '&amp;p[images][0]=';
+          echo urlencode($my_image);
+        }
+        echo '&amp;p[url]=';
+        echo urlencode(get_permalink());
+        echo "','sharer','toolbar=0,status=0,width=626,height=436'); return false;\""; 
+        echo ' class="share" title="Send this to friends or post it on your profile.">Share This Post</a>';
+        echo '</span>';
+        } // end if for enable_share   
+      if($enable_external_link == "true"){ 
           ?><span class="wpbook_external_post"><a href="<?php echo get_external_post_url(get_permalink()); ?>" title="View this post outside Facebook at <?php bloginfo('name'); ?>">View post on <?php bloginfo('name'); ?></a></span><?php 
             } // end if for enable external_link
             echo '</p>';
@@ -118,14 +129,25 @@ type="text/css" media="screen" />
             if(($enable_share == "true" || $enable_external_link == "true") && ($links_position == "bottom")) { 
               echo '<p>';
               if($enable_share == "true"){
-                ?><span class="wpbook_share_button">
-                <script src="http://connect.facebook.net/en_US/all.js#xfbml=1"></script>
-                <fb:like href="<?php the_permalink(); ?>" show_faces="true" width="150">
-                </fb:like> 
-                </span>
-                <?php                
-              } // end if for enable_share              
-            if($enable_external_link == "true"){
+                ?><span class="wpbook_share_button"><?php
+                  echo '<a onclick="window.open(\'http://www.facebook.com/sharer.php?s=100&amp;p[title]=';
+                  echo urlencode(get_the_title());
+                  echo '&amp;p[summary]=';
+                  echo urlencode((wp_filter_nohtml_kses(apply_filters('the_content',get_the_excerpt()))));
+                  if((function_exists('has_post_thumbnail')) && (has_post_thumbnail())) {
+                    $my_thumb_id = get_post_thumbnail_id();
+                    $my_thumb_array = wp_get_attachment_image_src($my_thumb_id);
+                    $my_image = $my_thumb_array[0]; // this should be the url                
+                    echo '&amp;p[images][0]=';
+                    echo urlencode($my_image);
+                  }
+                  echo '&amp;p[url]=';
+                  echo urlencode(get_permalink());
+                  echo "','sharer','toolbar=0,status=0,width=626,height=436'); return false;\""; 
+                  echo ' class="share" title="Send this to friends or post it on your profile.">Share This Post</a>';
+                  echo '</span>';
+                  } // end if for enable_share               
+                if($enable_external_link == "true"){
                 ?><span class="wpbook_external_post"><a href="<?php echo get_external_post_url(get_permalink()); ?>" title="View this post outside Facebook at <?php bloginfo('name'); ?>">View post on <?php bloginfo('name'); ?></a></span><?php
                   }
                   echo '</p>';
