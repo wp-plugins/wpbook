@@ -60,6 +60,7 @@ function wpbook_safe_publish_to_facebook($post_ID) {
       }
     }
   }
+  $facebook->setAccessToken($access_token);
   if((!empty($api_key)) && (!empty($secret)) && (!empty($target_admin)) && (($stream_publish == "true") || $stream_publish_pages == "true")) {
     // here we should also post to the author's stream
     if(WPBOOKDEBUG) {
@@ -175,7 +176,6 @@ function wpbook_safe_publish_to_facebook($post_ID) {
           if(!empty($my_image)) {
             /* message, picture, link, name, caption, description, source */      
             $attachment = array( 
-                                'access_token' => $access_token,
                                 'subject' => $my_title,
                                 'link' => $my_permalink,
                                 'message' => wp_kses(stripslashes(apply_filters('the_content',$my_post->post_content)),$allowedtags),  
@@ -184,7 +184,6 @@ function wpbook_safe_publish_to_facebook($post_ID) {
                                 ); 
           } else {
             $attachment = array( 
-                                'access_token' => $access_token,
                                 'subject' => $my_title,
                                 'link' => $my_permalink,
                                 'message' => wp_kses(stripslashes(apply_filters('the_content',$my_post->post_content)),$allowedtags), 
@@ -209,7 +208,6 @@ function wpbook_safe_publish_to_facebook($post_ID) {
           if(!empty($my_image)) {
             /* message, picture, link, name, caption, description, source */      
             $attachment = array( 
-                                'access_token' => $access_token,
                                 'name' => $my_title,
                                 'link' => $my_permalink,
                                 'description' => $wpbook_description,  
@@ -218,7 +216,6 @@ function wpbook_safe_publish_to_facebook($post_ID) {
                                 ); 
           } else {
             $attachment = array( 
-                                'access_token' => $access_token,
                                 'name' => $my_title,
                                 'link' => $my_permalink,
                                 'description' => $wpbook_description,  
@@ -282,7 +279,6 @@ function wpbook_safe_publish_to_facebook($post_ID) {
         if(!empty($my_image)) {
           /* message, picture, link, name, caption, description, source */      
           $attachment = array( 
-                              'access_token' => $access_token,
                               'name' => $my_title,
                               'link' => $my_permalink,
                               'description' => $wpbook_description,  
@@ -291,7 +287,6 @@ function wpbook_safe_publish_to_facebook($post_ID) {
                               ); 
         } else {
           $attachment = array( 
-                              'access_token' => $access_token,
                               'name' => $my_title,
                               'link' => $my_permalink,
                               'description' => $wpbook_description, 
@@ -334,7 +329,8 @@ function wpbook_safe_publish_to_facebook($post_ID) {
     if(($stream_publish_pages == "true") && (!empty($target_page))) {      
       // publish to page with new api
       $fb_response = '';
-      $access_token = get_option('wpbook_page_access_token');
+      $access_token = get_option('wpbook_page_access_token','');
+	  $facebook->setAccessToken($access_token);
       if(WPBOOKDEBUG) {
         $fp = @fopen($debug_file, 'a');
         $debug_string=date("Y-m-d H:i:s",time())." : Page access token is ". $access_token ."\n";
