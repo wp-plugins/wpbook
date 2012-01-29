@@ -6,8 +6,8 @@ Date: 2012, January 10th
 Description: Plugin to embed Wordpress Blog into Facebook Canvas using the Facebook Platform. 
 Author: John Eckman
 Author URI: http://johneckman.com
-Version: 2.3.3
-Stable tag: 2.3.3
+Version: 2.3.4
+Stable tag: 2.3.4
 
 */
   
@@ -1120,10 +1120,10 @@ function wpbook_meta_box() {
   checked('yes', $wpbook_publish, true);
   echo ' /> <label for="wpbook_fb_publish_yes">'.__('yes', 'wpbook').'</label> &nbsp;&nbsp;';
   echo '<input type="radio" name="wpbook_fb_publish" id="wpbook_fb_publish_no" value="no" ';
-  checked('no', $wpbook_publish, false);
+  checked('no', $wpbook_publish, true);
   echo ' /> <label for="wpbook_fb_publish_no">'.__('no', 'wpbook').'</label>';
   echo '</p>';
-  do_action('wpbook_post_options');
+  do_action('wpbook_store_post_options');
 }
   
 function wpbook_add_meta_box() {
@@ -1315,7 +1315,11 @@ function wpbook_get_global_facebook_avatar($avatar, $comment, $size="50") {
     foreach ($wpbookOptions as $key => $option)
       $wpbookAdminOptions[$key] = $option;
   }
-  if(($wpbookAdminOptions['use_gravatar'] =="true") && ($wpbookAdminOptions['wpbook_use_global_gravatar'] =="true")){
+  if(($wpbookAdminOptions['use_gravatar'] =="true") 
+		&& ($wpbookAdminOptions['wpbook_use_global_gravatar'] =="true") 
+		&& (is_object($comment)) && (isset($comment->comment_author_email)) 
+		&& ($comment->comment_author_email == $wpbookLiteAdminOptions['imported_comments_email'])
+	){
     $author_url = get_comment_author_url();
     $email = get_comment_author_email();
     $default = $wpbookAdminOptions['gravatar_default'];
