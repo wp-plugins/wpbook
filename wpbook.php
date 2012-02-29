@@ -2,13 +2,12 @@
 /*
 Plugin Name: WPBook
 Plugin URI: http://wpbook.net/
-Date: 2012, January 10th
+Date: 2012, February 29th
 Description: Plugin to embed Wordpress Blog into Facebook Canvas using the Facebook Platform. 
 Author: John Eckman
 Author URI: http://johneckman.com
-Version: 2.3.3
-Stable tag: 2.3.3
-
+Version: 2.3.5
+Stable tag: 2.3.5
 */
   
 /*
@@ -1120,10 +1119,10 @@ function wpbook_meta_box() {
   checked('yes', $wpbook_publish, true);
   echo ' /> <label for="wpbook_fb_publish_yes">'.__('yes', 'wpbook').'</label> &nbsp;&nbsp;';
   echo '<input type="radio" name="wpbook_fb_publish" id="wpbook_fb_publish_no" value="no" ';
-  checked('no', $wpbook_publish, false);
+  checked('no', $wpbook_publish, true);
   echo ' /> <label for="wpbook_fb_publish_no">'.__('no', 'wpbook').'</label>';
   echo '</p>';
-  do_action('wpbook_post_options');
+  do_action('wpbook_store_post_options');
 }
   
 function wpbook_add_meta_box() {
@@ -1315,7 +1314,10 @@ function wpbook_get_global_facebook_avatar($avatar, $comment, $size="50") {
     foreach ($wpbookOptions as $key => $option)
       $wpbookAdminOptions[$key] = $option;
   }
-  if(($wpbookAdminOptions['use_gravatar'] =="true") && ($wpbookAdminOptions['wpbook_use_global_gravatar'] =="true")){
+  if(($wpbookAdminOptions['use_gravatar'] =="true") 
+		&& ($wpbookAdminOptions['wpbook_use_global_gravatar'] =="true") 
+		&& (is_object($comment)) 
+	){
     $author_url = get_comment_author_url();
     $email = get_comment_author_email();
     $default = $wpbookAdminOptions['gravatar_default'];
@@ -1412,7 +1414,8 @@ add_action('future_to_publish','wpbook_publish_to_facebook');
 add_action('new_to_publish','wpbook_publish_to_facebook');
 add_action('draft_to_publish','wpbook_publish_to_facebook');  
 add_action('pending_to_publish','wpbook_publish_to_facebook');
-
+// support xml-rpc clients
+add_action('auto-draft_to_publish','wpbook_publish_to_facebook');
   
 // cron job task  
 add_action('wpbook_cron_job', 'wpbook_import_comments');

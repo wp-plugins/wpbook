@@ -1,8 +1,8 @@
 === WPBook ===
 Contributors: johneckman, davelester, BandonRandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.3.3
-Tested up to: 3.3
+Stable tag: 2.3.5
+Tested up to: 3.3.1
 Requires at least: 2.9.0
 
 Plugin to embed WordPress Blog into Facebook Platform. Requires PHP 5. 
@@ -100,6 +100,17 @@ See:
 http://wordpress.org/support/topic/how-do-i-add-featured-image-support-to-any-theme
 
 == Changelog ==
+
+= 2.3.5 = 
+ * Added auto-draft to publish action, better support for Windows Live Writer 
+   and other XML-RPC clients. 
+ * Added check for Facebook class inside comments.php file
+ * Reverted some changes to Gravatar code that was overly restrictive in 2.3.4
+ 
+= 2.3.4 = 
+ * Bugfix for iFrame style page tabs, introduced via the newer Facebook sdk. 
+   Was throwing "headers already sent" warnings for those pages. 
+ * Bugfix for overly broad filter for global avatars outside comments. 
 
 = 2.3.3 = 
  * Delete options from db on uninstall
