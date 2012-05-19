@@ -1,8 +1,8 @@
 === WPBook ===
 Contributors: johneckman, davelester, BandonRandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.3.3
-Tested up to: 3.3
+Stable tag: 2.5.1
+Tested up to: 3.3.1
 Requires at least: 2.9.0
 
 Plugin to embed WordPress Blog into Facebook Platform. Requires PHP 5. 
@@ -100,6 +100,38 @@ See:
 http://wordpress.org/support/topic/how-do-i-add-featured-image-support-to-any-theme
 
 == Changelog ==
+
+= 2.5.1 = 
+ * Had missed some entries in the theme which referred to offline_access
+   Shouldn't cause problems for anyone but should be removed as it will be 
+   deprecated. 
+
+= 2.5 = 
+ * Added hook to remove all the post_meta that wpbook created
+   while installed
+ * Accomodate Facebook having deprecated offline_access permission. For most
+   users you won't notice a difference. However, sometime after June 2012 you
+   will notice that your tokens expire every 60 days and require new tokens 
+   to be generated. Sorry, but that's Facebook's new policy.    
+
+= 2.4 = 
+ * Added wpbook message field to meta box. This will be used over the excerpt
+   if it is present. 
+ * Bugfix for duplicate post_meta (custom fields) - never interfered with 
+   functionality but did create unnecessary date. Now only one wpbook_publish per
+   post. 
+ * Added user_groups permission for publishing to non-public groups
+
+= 2.3.5 = 
+ * Added auto-draft to publish action, better support for Windows Live Writer 
+   and other XML-RPC clients. 
+ * Added check for Facebook class inside comments.php file
+ * Reverted some changes to Gravatar code that was overly restrictive in 2.3.4
+ 
+= 2.3.4 = 
+ * Bugfix for iFrame style page tabs, introduced via the newer Facebook sdk. 
+   Was throwing "headers already sent" warnings for those pages. 
+ * Bugfix for overly broad filter for global avatars outside comments. 
 
 = 2.3.3 = 
  * Delete options from db on uninstall
