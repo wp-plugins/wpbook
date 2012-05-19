@@ -2,13 +2,12 @@
 /*
 Plugin Name: WPBook
 Plugin URI: http://wpbook.net/
-Date: 2012, January 10th
+Date: 2012, May 19th
 Description: Plugin to embed Wordpress Blog into Facebook Canvas using the Facebook Platform. 
 Author: John Eckman
 Author URI: http://johneckman.com
-Version: 2.3.3
-Stable tag: 2.3.3
-
+Version: 2.5
+Stable tag: 2.5
 */
   
 /*
@@ -1110,66 +1109,71 @@ function wpbook_attribution_line($attribution_line,$author){
  * posts to twitter
  */
 function wpbook_meta_box() {
-  global $post;
-  $wpbook_publish = get_post_meta($post->ID, 'wpbook_fb_publish', true);
-  if ($wpbook_publish == '') {
-    $wpbook_publish = 'yes';
-  }
-  echo '<p>'.__('Publish this post to Facebook Wall?', 'wpbook').'<br/>';
-  echo '<input type="radio" name="wpbook_fb_publish" id="wpbook_fb_publish_yes" value="yes" ';
-  checked('yes', $wpbook_publish, true);
-  echo ' /> <label for="wpbook_fb_publish_yes">'.__('yes', 'wpbook').'</label> &nbsp;&nbsp;';
-  echo '<input type="radio" name="wpbook_fb_publish" id="wpbook_fb_publish_no" value="no" ';
-  checked('no', $wpbook_publish, false);
-  echo ' /> <label for="wpbook_fb_publish_no">'.__('no', 'wpbook').'</label>';
-  echo '</p>';
-  do_action('wpbook_post_options');
+	global $post;
+	$wpbook_publish = get_post_meta($post->ID, 'wpbook_fb_publish', true);
+	$wpbook_message = get_post_meta($post->ID, 'wpbook_message', true); 
+	if ($wpbook_publish == '') {
+		$wpbook_publish = 'yes';
+	}
+	echo '<p>'.__('Publish this post to Facebook Wall?', 'wpbook').'<br/>';
+	echo '<input type="radio" name="wpbook_fb_publish" id="wpbook_fb_publish_yes" value="yes" ';
+	checked('yes', $wpbook_publish, true);
+	echo ' /> <label for="wpbook_fb_publish_yes">'.__('Yes', 'wpbook').'</label> &nbsp;&nbsp;';
+	echo '<input type="radio" name="wpbook_fb_publish" id="wpbook_fb_publish_no" value="no" ';
+	checked('no', $wpbook_publish, true);
+	echo ' /> <label for="wpbook_fb_publish_no">'.__('No', 'wpbook').'</label>';
+	echo '</p>';
+	echo '<p>'.__('Message for Facebook post: (plain text)','wpbook').'<br/>';
+	echo '<p><textarea cols="60" rows="4" style="width:95%" name="wpbook_message" id="wpbook_message">';
+	echo $wpbook_message;
+	echo '</textarea></p>';
+	do_action('wpbook_store_post_options');
 }
   
 function wpbook_add_meta_box() {
-  global $wp_version;
-  if (version_compare($wp_version, '2.7', '>=')) {
-    add_meta_box('wpbook_post_form','WPBook', 'wpbook_meta_box', 'post', 'side');
-  } else {
-    add_meta_box('wpbook_post_form','WPBook', 'wpbook_meta_box', 'post', 'normal');
-  }
+	global $wp_version;
+	if (version_compare($wp_version, '2.7', '>=')) {
+		add_meta_box('wpbook_post_form','WPBook', 'wpbook_meta_box', 'post', 'side');
+	} else {
+		add_meta_box('wpbook_post_form','WPBook', 'wpbook_meta_box', 'post', 'normal');
+	}
 }
   
 function wpbook_store_post_options($post_id, $post = false) {
-  if (!$post || $post->post_type == 'revision') { // store the metadata with the post, not the revision
+	if (!$post || $post->post_type == 'revision') { // store the metadata with the post, not the revision
 		return;
 	}  
-  $wpbookAdminOptions = wpbook_getAdminOptions();
-  $post = get_post($post_id);
-  $stored_meta = get_post_meta($post_id, 'wpbook_fb_publish', true);
-  $posted_meta = $_POST['wpbook_fb_publish'];
+	$wpbookAdminOptions = wpbook_getAdminOptions();
+	$post = get_post($post_id);
+	$stored_meta = get_post_meta($post_id, 'wpbook_fb_publish', true);
+	$posted_meta = $_POST['wpbook_fb_publish'];
+	$wpbook_message = $_POST['wpbook_message'];
+	$save = false;
+	/* if there is $posted_meta, that takes priority over stored */
+	if (!empty($posted_meta)) { 
+		$posted_meta == 'yes' ? $meta = 'yes' : $meta = 'no';
+		$save = true;
+	}
+	/* if no posted meta, check stored meta */ 
+	else if (empty($stored_meta)) {
+		/* if no stored meta, but streaming publishing is on, default to yes */
+		if (($wpbookAdminOptions['stream_publish']) || ($wpbookAdminOptions['stream_publish_pages'])) {
+			$meta = 'yes';
+		} else {
+		$meta = 'no';
+		}
+		$save = true;
+	/* if there is stored meta, and user didn't touch it, don't save */ 
+	} else {
+		$save = false;
+	}
     
-  $save = false;
-  /* if there is $posted_meta, that takes priority over stored */
-  if (!empty($posted_meta)) { 
-    $posted_meta == 'yes' ? $meta = 'yes' : $meta = 'no';
-    $save = true;
-  }
-  /* if no posted meta, check stored meta */ 
-  else if (empty($stored_meta)) {
-    /* if no stored meta, but streaming publishing is on, default to yes */
-    if (($wpbookAdminOptions['stream_publish']) || ($wpbookAdminOptions['stream_publish_pages'])) {
-      $meta = 'yes';
-    } else {
-      $meta = 'no';
-    }
-    $save = true;
-  /* if there is stored meta, and user didn't touch it, don't save */ 
-  } else {
-    $save = false;
-  }
-    
-  if ($save) {
-    if (!update_post_meta($post_id, 'wpbook_fb_publish', $meta)) {
-      add_post_meta($post_id, 'wpbook_fb_publish', $meta);
-    }
-  }
+	if ($save) {
+      update_post_meta($post_id, 'wpbook_fb_publish', $meta);
+	}
+	update_post_meta($post_id, 'wpbook_message', $wpbook_message); 
 }
+
 add_action('draft_post', 'wpbook_store_post_options', 1, 2);
 add_action('publish_post', 'wpbook_store_post_options', 1, 2);
 add_action('save_post', 'wpbook_store_post_options', 1, 2);
@@ -1315,7 +1319,10 @@ function wpbook_get_global_facebook_avatar($avatar, $comment, $size="50") {
     foreach ($wpbookOptions as $key => $option)
       $wpbookAdminOptions[$key] = $option;
   }
-  if(($wpbookAdminOptions['use_gravatar'] =="true") && ($wpbookAdminOptions['wpbook_use_global_gravatar'] =="true")){
+  if(($wpbookAdminOptions['use_gravatar'] =="true") 
+		&& ($wpbookAdminOptions['wpbook_use_global_gravatar'] =="true") 
+		&& (is_object($comment)) 
+	){
     $author_url = get_comment_author_url();
     $email = get_comment_author_email();
     $default = $wpbookAdminOptions['gravatar_default'];
@@ -1381,10 +1388,32 @@ function wpbook_deinstall() {
 	delete_option('wpbookAdminOptions');
 	delete_option('wpbook_user_access_token');
 	delete_option('wpbook_page_access_token');
+	
+	/* per http://codex.wordpress.org/Function_Reference/delete_post_meta */
+	$wpbook_allposts = get_posts('numberposts=-1&post_type=post&post_status=any');
+	foreach( $wpbook_allposts as $wpbook_postinfo) {
+		delete_post_meta($wpbook_postinfo->ID, 'wpbook_fb_publish');
+		delete_post_meta($wpbook_postinfo->ID, 'wpbook_message');
+	}
 }  
+// display admin notice if token is invalid
+function wpbook_token_notice() {
+?>
+  <div class='error fade'>
+    <p>Your Facebook Access Token for WPBook has expired. Please
+	   <a href="/wp-admin/options-general.php?page=wpbook.php">visit the settings page for WPBook</a> and grant a new
+	   access token. Until you do so, cross-posting to Facebook and import of 
+	   comments will fail.</p>
+  </div>
+<?php
+}
   
   
-  
+//admin notice for expired token
+$my_access_token = get_option('wpbook_user_access_token','');
+if ($my_access_token == 'invalid') {
+	add_action('admin_notices', 'wpbook_token_notice');
+}  
   
 add_filter('query_vars', 'wpbook_query_vars');	
 add_filter('post_link','fb_filter_postlink',1,1);
@@ -1412,7 +1441,8 @@ add_action('future_to_publish','wpbook_publish_to_facebook');
 add_action('new_to_publish','wpbook_publish_to_facebook');
 add_action('draft_to_publish','wpbook_publish_to_facebook');  
 add_action('pending_to_publish','wpbook_publish_to_facebook');
-
+// support xml-rpc clients
+add_action('auto-draft_to_publish','wpbook_publish_to_facebook');
   
 // cron job task  
 add_action('wpbook_cron_job', 'wpbook_import_comments');
