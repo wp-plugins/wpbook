@@ -101,6 +101,10 @@ http://wordpress.org/support/topic/how-do-i-add-featured-image-support-to-any-th
 
 == Changelog ==
 
+= 2.5.2 =
+ * doh! Bad typo in the facebook publish code, rending access tokens invalid. 
+   Quick fix, everyone should be on 2.5.2. 
+
 = 2.5.1 = 
  * Had missed some entries in the theme which referred to offline_access
    Shouldn't cause problems for anyone but should be removed as it will be 
