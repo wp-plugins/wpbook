@@ -6,8 +6,8 @@ Date: 2012, September 29th
 Description: Plugin to embed Wordpress Blog into Facebook Canvas using the Facebook Platform. 
 Author: John Eckman
 Author URI: http://johneckman.com
-Version: 2.5.4
-Stable tag: 2.5.4
+Version: 2.6.3
+Stable tag: 2.6.3
 */
   
 /*
@@ -1407,7 +1407,7 @@ function wpbook_token_notice() {
 ?>
   <div class='error fade'>
     <p>Your Facebook Access Token for WPBook has expired. Please
-	   <a href="/wp-admin/options-general.php?page=wpbook.php">visit the settings page for WPBook</a> and grant a new
+	   <a href="<?php echo admin_url('options-general.php?page=wpbook.php'); ?>">visit the settings page for WPBook</a> and grant a new
 	   access token. Until you do so, cross-posting to Facebook and import of 
 	   comments will fail.</p>
   </div>
