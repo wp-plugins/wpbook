@@ -1,12 +1,7 @@
 <?php
 /* first include just sets up WP settings */  
 include_once(WP_PLUGIN_DIR . '/wpbook/theme/config_wp_settings.php');
-if((isset($_GET['app_tab'])) && (isset($_GET['fb_force_mode']))) {
-  // output tab in FBML mode to edit this change the wpbook/theme/fbml_tabs.php
-  include_once(WP_CONTENT_DIR . '/themes/wpbook_theme/fbml_tabs.php');
-}
-
-if((isset($_GET['app_tab'])) && (!isset($_GET['fb_force_mode']))) { // this is an app tab
+if(isset($_GET['app_tab'])) { // this is an app tab
   // output tab in iFrame mode to edit this change the wpbook/theme/tabs.php
   include_once(WP_CONTENT_DIR . '/themes/wpbook_theme/tab.php');
   die(); // nothing more to do after loading tab
@@ -27,57 +22,8 @@ $facebook = new Facebook(array(
                               )
                          );
 
-if((!isset($_GET['app_tab'])) && (isset($_GET['is_invite']))) { // this is the invite page
-  if(isset($_POST["ids"])) { // this means we've already added some stuff
-    echo "<center>Thank you for inviting ".sizeof($_POST["ids"])
-        ." of your friends to ". $app_name .". <br><br>\n"; 
-    echo "<h2><a href=\"".$proto."://apps.facebook.com/".$app_url
-        ."/\">Click here to return to ".$app_name."</a>.</h2></center>"; 
-  } 
-  else { 
-    // Retrieve array of friends who've already added the app. 
-    $fql = 'SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend '
-        . 'WHERE uid1='. $data["user_id"] .') AND is_app_user = 1'; 
-    $params = array(
-                    'method' => 'fql.query',
-                    'query' => $fql,
-                    );
-    try {
-      $_friends = $facebook->api($params); 
-    } catch (FacebookApiException $e) {
-      if($wpbook_show_errors) {
-        $wpbook_message = 'Caught exception in getting friends for user: ' .  $e->getMessage() .'Error code: '. $e->getCode();  
-        wp_die($wpbook_message,'WPBook Error');
-      } // end if for show errors
-    }
-    // Extract the user ID's returned in the FQL request into a new array. 
-    $friends = array(); 
-    if (is_array($_friends) && count($_friends)) {
-      foreach ($_friends as $friend) { 
-        $friends[] = $friend['uid']; 
-      } 
-    } // Convert the array of friends into a comma-delimeted string. 
-    $friends = implode(',', $friends); 
-      // Prepare the invitation text that all invited users will receive. 
-    $content = "<fb:name uid=\"".$user
-        ."\" firstnameonly=\"true\" shownetwork=\"false\"/> has started using "
-        ."<a href=\"".$proto."://apps.facebook.com/".$app_url."/\">"
-        . $app_name ."</a> and thought you should try it out!\n"
-        ."<fb:req-choice url=\"http://www.facebook.com/add.php?api_key=". $api_key
-      ."\" label=\"Add ". $app_name ." to your profile\"/>"; 
-    echo '<fb:fbml><fb:title>Invite Friends</fb:title>';
-    echo '<fb:request-form action="'.$proto.'://apps.facebook.com/'. $app_url .'" '; 
-    echo 'method="post" type="'. $app_name .'" ';
-    echo 'content="'. htmlentities($content) .'" image="'. $app_image .'">'; 
-    echo '<fb:multi-friend-selector actiontext="Here are your friends who do not ';
-    echo 'have '. $app_name .' yet. Invite all you want!"'; 
-    echo ' exclude_ids="'. $friends .'" bypass="cancel" />';
-    echo '</fb:request-form></fb:fbml>';
-  }  // end of the else for $_POST["ids"]
-} // end of the if for $_GET['is_invite']
-
-// Done with potential invite page, now do permissions
-  if((!isset($_GET['app_tab'])) && (!isset($_GET['is_invite'])) && (isset($_GET['is_permissions']))) { // we're looking for extended permissions
+// Check for permissions
+  if((!isset($_GET['app_tab'])) && (isset($_GET['is_permissions']))) { // we're looking for extended permissions
   $receiver_url = WP_PLUGIN_URL . '/wpbook/theme/default/xd_receiver.html';
   ?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
@@ -94,11 +40,22 @@ if((!isset($_GET['app_tab'])) && (isset($_GET['is_invite']))) { // this is the i
   <body>
   <p>This page is where you can check and grant extended permissions, which enable WPBook to 
    publish to your personal wall and/or to the walls of fan pages.</p>
-  <p>Your userid is <?php echo $data["user_id"]; ?> </p>
-  <p><strong>You will need to enter that number into the WPBook settings page on your WordPress install.</strong></p>
+   <?php  // try catch wrapped call to FB API /me to get logged in users ID 
+   $user = $facebook->getUser();
+   if ($user) {
+     try {
+       // Proceed knowing you have a logged in user who's authenticated.
+       $user_profile = $facebook->api('/me');
+     } catch (FacebookApiException $e) {
+       echo '<pre>'.htmlspecialchars(print_r($e, true)).'</pre>';
+       $user = null;
+     }
+   }
+   ?>
+  <p>The Facebook profile ID you are currently logged in to Facebook as is <?php echo $user_profile['id']; ?>. You have defined <?php echo $target_admin; ?> as your Facebook user id in WPBook Settings.</p>
   <p>This user_id has granted these permissions:
   <?php // need to set some permissions checks here
-  $fql = 'SELECT read_stream,publish_stream,manage_pages FROM permissions WHERE uid='. $data["user_id"]; 
+  $fql = 'SELECT read_stream,publish_actions,publish_stream,manage_pages FROM permissions WHERE uid='. $user_profile['id']; 
     $params = array(
                     'method' => 'fql.query',
                     'query' => $fql,
@@ -185,7 +142,7 @@ echo $my_permissions_url;
   <script>
     window.fbAsyncInit = function() {
       FB.init({appId: <?php echo $api_key; ?>, status: true, cookie: true, xfbml: true});
-      FB.Canvas.setAutoResize();
+      FB.Canvas.setAutoGrow();
     };
   (function() {
    var e = document.createElement('script'); e.async = true;
@@ -199,7 +156,7 @@ echo $my_permissions_url;
   <?php 
 } // end of the permissions page, now regular themed page
 
-if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))&&(!isset($_GET['app_tab']))) {  // this is the regular blog page
+if((!isset($_GET['is_permissions'])) && (!isset($_GET['app_tab']))) {  // this is the regular blog page
   $receiver_url = WP_CONTENT_DIR .'/themes/wpbook_theme/xd_receiver.html';
   ?>
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
@@ -227,11 +184,6 @@ if((!isset($_GET['is_invite']))&&(!isset($_GET['is_permissions']))&&(!isset($_GE
   <div class="wpbook_header">
   
   <?php 
-  if($invite_friends == "true"){
-    $invite_link = '<a class="FB_UIButton FB_UIButton_Gray FB_UIButton_CustomIcon" href="'.$proto.'://apps.facebook.com/' . $app_url 
-        .'/index.php?is_invite=true&fb_force_mode=fbml" class="share"><span class="FB_UIButton_Text"><span class="FB_Bookmark_Icon"></span> Invite Friends </span></a>';
-    echo '<div style="float:right; margin-left: 3px; margin-bottom: 3px;  ">'. $invite_link .'</div>';	
-  } 
   echo '<h3><a href="'.$proto.'://apps.facebook.com/'. $app_url .'/" target="_top">'. get_bloginfo('name') .'</a></h3>';
   
   if(($show_pages == "true") && ($show_pages_menu == "true")){

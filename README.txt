@@ -1,8 +1,8 @@
 === WPBook ===
 Contributors: johneckman, davelester, BandonRandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.6.3
-Tested up to: 3.4
+Stable tag: 2.6.6
+Tested up to: 3.6
 Requires at least: 2.9.0
 
 Plugin to embed WordPress Blog into Facebook Platform. Requires PHP 5. 
@@ -100,6 +100,22 @@ See:
 http://wordpress.org/support/topic/how-do-i-add-featured-image-support-to-any-theme
 
 == Changelog ==
+
+= 2.6.6 = 
+ * Comment out appsecret_proof in Facebook SDK. This is causing calls to FB API
+   to fail - not sure why. 
+
+= 2.6.5 = 
+ * Change to the posting method for posting to groups
+ * Change to asking for publish_actions in addition to publish_stream - may be needed in 
+   the new Facebook API
+
+= 2.6.4 = 
+ * Removed "Invite Friends" link option from settings and display. Since FB hasn't
+   supported FBML for a while this simply wasn't working. 
+ * Removed FBML based tabs - application tabs should now all be HTML in iframes
+ * Fixed "check permissions" page which was incorrectly reporting unset permissions - 
+   bug introduced in 2.6. 
 
 = 2.6.3 =
  * Discovered by parsing error logs that users requesting a canvas page inside Facebook
