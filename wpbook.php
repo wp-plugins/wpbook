@@ -87,7 +87,7 @@ function wpbook_getAdminOptions() {
 	if (!empty($wpbookOptions)) {
 		foreach ($wpbookOptions as $key => $option)
 			$wpbookAdminOptions[$key] = $option;
-		if ($_SERVER['HTTPS'] == "on") {
+		if ((array_key_exists('HTTPS', $_SERVER)) && ($_SERVER['HTTPS'] == "on")) {
 		    $wpbookAdminOptions['proto'] = "https";
 		} else {
 		    $wpbookAdminOptions['proto'] = "http";
@@ -1316,8 +1316,8 @@ function wpbook_get_global_facebook_avatar($avatar, $comment, $size="50") {
     foreach ($wpbookOptions as $key => $option)
       $wpbookAdminOptions[$key] = $option;
   }
-  if((!empty($wpbookAdminOptions)) 
-        && ($wpbookAdminOptions['use_gravatar'] =="true")
+  if((!empty($wpbookAdminOptions))
+    && ($wpbookAdminOptions['use_gravatar'] =="true")
 		&& ($wpbookAdminOptions['wpbook_use_global_gravatar'] =="true")
 		&& (is_object($comment))
 	){
