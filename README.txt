@@ -1,8 +1,8 @@
 === WPBook ===
 Contributors: johneckman, davelester, BandonRandon
 Tags: facebook, platform, application, blog, mirror
-Stable tag: 2.7.1
-Tested up to: 4.0
+Stable tag: 2.7.2
+Tested up to: 4.2
 Requires at least: 2.9.0
 
 Plugin to embed WordPress Blog into Facebook Platform. Requires PHP 5. 
@@ -100,6 +100,9 @@ See:
 http://wordpress.org/support/topic/how-do-i-add-featured-image-support-to-any-theme
 
 == Changelog ==
+
+= 2.7.2 = 
+ * Fix nonce protection, clean up some warnings on strings 
 
 = 2.7.1 = 
  * Added wp_nonce protection to admin form to prevent CSRF - thanks to Ryan Satterfield
